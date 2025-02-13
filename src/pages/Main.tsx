@@ -1,12 +1,13 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Book, Users, Calendar, Settings, 
-         Video, Music, PrayingHands, Share2 } from "lucide-react";
+import { Book, Users, Calendar } from "lucide-react";
+import { WelcomeSection } from "@/components/dashboard/WelcomeSection";
+import { PrayerRequestsSection } from "@/components/dashboard/PrayerRequestsSection";
+import { CommunityNewsSection } from "@/components/dashboard/CommunityNewsSection";
+import { ResourceLibrarySection } from "@/components/dashboard/ResourceLibrarySection";
 
 interface UserProfile {
   username: string;
@@ -14,7 +15,6 @@ interface UserProfile {
   ministry_interests: string[];
 }
 
-// New interfaces for additional content types
 interface PrayerRequest {
   id: string;
   title: string;
@@ -131,7 +131,6 @@ const Main = () => {
     }
   };
 
-  // New data loading functions
   const loadPrayerRequests = async () => {
     try {
       const { data, error } = await supabase
@@ -196,28 +195,8 @@ const Main = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-100 p-4">
       <div className="max-w-7xl mx-auto space-y-6">
-        {/* Welcome Section */}
-        <Card className="p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-4">
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <User className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold">Welcome, {profile?.username || "Friend"}</h1>
-                <p className="text-muted-foreground">
-                  {profile?.church_affiliation || "Your Church"}
-                </p>
-              </div>
-            </div>
-            <Button variant="outline" onClick={() => navigate("/profile")}>
-              <Settings className="h-4 w-4 mr-2" />
-              Profile Settings
-            </Button>
-          </div>
-        </Card>
+        <WelcomeSection profile={profile} />
 
-        {/* Quick Actions */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer">
             <div className="space-y-4">
@@ -250,7 +229,6 @@ const Main = () => {
           </Card>
         </div>
 
-        {/* Ministry Interests */}
         {profile?.ministry_interests && profile.ministry_interests.length > 0 && (
           <Card className="p-6">
             <h2 className="text-xl font-semibold mb-4">Your Ministry Interests</h2>
@@ -267,106 +245,9 @@ const Main = () => {
           </Card>
         )}
 
-        {/* Prayer Requests Section */}
-        <Card className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Prayer Requests</h2>
-            <Button 
-              variant="outline" 
-              onClick={() => navigate("/prayer-requests")}
-              className="transition-all duration-300 hover:bg-primary hover:text-primary-foreground"
-            >
-              View All
-            </Button>
-          </div>
-          <div className="space-y-4">
-            {prayerRequests.map((request) => (
-              <div 
-                key={request.id}
-                className="p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors cursor-pointer"
-                onClick={() => navigate(`/prayer-requests/${request.id}`)}
-              >
-                <div className="flex items-start space-x-4">
-                  <PrayingHands className="h-6 w-6 mt-1 text-primary" />
-                  <div>
-                    <h3 className="font-semibold">{request.title}</h3>
-                    <p className="text-sm text-muted-foreground">
-                      {request.description.substring(0, 100)}...
-                    </p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
-
-        {/* Community News Section */}
-        <Card className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Community News</h2>
-            <Button 
-              variant="outline" 
-              onClick={() => navigate("/news")}
-              className="transition-all duration-300 hover:bg-primary hover:text-primary-foreground"
-            >
-              View All
-            </Button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {communityNews.map((post) => (
-              <Card 
-                key={post.id}
-                className="p-4 hover:shadow-lg transition-all duration-300 cursor-pointer"
-                onClick={() => navigate(`/news/${post.id}`)}
-              >
-                <div className="space-y-3">
-                  <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
-                    <Book className="h-12 w-12 text-muted-foreground" />
-                  </div>
-                  <h3 className="font-semibold">{post.title}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    By {post.author} • {post.content.substring(0, 100)}...
-                  </p>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </Card>
-
-        {/* Resource Library Section */}
-        <Card className="p-6">
-          <div className="flex items-center justify-between mb-4">
-            <h2 className="text-xl font-semibold">Resource Library</h2>
-            <Button 
-              variant="outline" 
-              onClick={() => navigate("/resources")}
-              className="transition-all duration-300 hover:bg-primary hover:text-primary-foreground"
-            >
-              View All
-            </Button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {resources.map((resource) => (
-              <Card 
-                key={resource.id}
-                className="p-4 hover:shadow-lg transition-all duration-300 cursor-pointer"
-                onClick={() => navigate(`/resources/${resource.id}`)}
-              >
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm">
-                      {resource.category}
-                    </span>
-                  </div>
-                  <h3 className="font-semibold">{resource.title}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {resource.description.substring(0, 100)}...
-                  </p>
-                </div>
-              </Card>
-            ))}
-          </div>
-        </Card>
+        <PrayerRequestsSection prayerRequests={prayerRequests} />
+        <CommunityNewsSection communityNews={communityNews} />
+        <ResourceLibrarySection resources={resources} />
       </div>
     </div>
   );
