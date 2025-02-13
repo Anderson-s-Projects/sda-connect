@@ -1,7 +1,9 @@
 
 import { useState, useEffect } from "react";
+import { Link } from "react-router-dom";
 import { ChevronRight, Heart, Users, Calendar, Book } from "lucide-react";
 import { motion } from "framer-motion";
+import { supabase } from "@/integrations/supabase/client";
 
 const Features = [
   {
@@ -28,10 +30,22 @@ const Features = [
 
 const Index = () => {
   const [mounted, setMounted] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   useEffect(() => {
     setMounted(true);
+    checkUser();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsAuthenticated(!!session);
+    });
+
+    return () => subscription.unsubscribe();
   }, []);
+
+  const checkUser = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    setIsAuthenticated(!!session);
+  };
 
   return (
     <div className="min-h-screen flex flex-col items-center">
@@ -39,12 +53,26 @@ const Index = () => {
         <div className="max-w-7xl mx-auto flex justify-between items-center">
           <h1 className="text-2xl font-bold text-primary">SDA Connect</h1>
           <div className="flex gap-4">
-            <button className="px-4 py-2 rounded-full text-primary hover:bg-white/50 transition-colors">
-              Sign In
-            </button>
-            <button className="px-4 py-2 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors">
-              Join Now
-            </button>
+            {isAuthenticated ? (
+              <Link to="/profile">
+                <button className="px-4 py-2 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors">
+                  Profile
+                </button>
+              </Link>
+            ) : (
+              <>
+                <Link to="/auth">
+                  <button className="px-4 py-2 rounded-full text-primary hover:bg-white/50 transition-colors">
+                    Sign In
+                  </button>
+                </Link>
+                <Link to="/auth">
+                  <button className="px-4 py-2 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors">
+                    Join Now
+                  </button>
+                </Link>
+              </>
+            )}
           </div>
         </div>
       </nav>
@@ -64,10 +92,21 @@ const Index = () => {
               Join a vibrant community of believers dedicated to spiritual growth
               and fellowship
             </p>
-            <button className="px-8 py-4 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all transform hover:scale-105 inline-flex items-center gap-2">
-              Get Started
-              <ChevronRight className="h-5 w-5" />
-            </button>
+            {isAuthenticated ? (
+              <Link to="/profile">
+                <button className="px-8 py-4 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all transform hover:scale-105 inline-flex items-center gap-2">
+                  Go to Profile
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              </Link>
+            ) : (
+              <Link to="/auth">
+                <button className="px-8 py-4 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all transform hover:scale-105 inline-flex items-center gap-2">
+                  Get Started
+                  <ChevronRight className="h-5 w-5" />
+                </button>
+              </Link>
+            )}
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
