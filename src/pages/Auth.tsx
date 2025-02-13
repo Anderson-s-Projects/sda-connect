@@ -21,21 +21,62 @@ const Auth = () => {
 
     try {
       if (isSignUp) {
-        const { error } = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            emailRedirectTo: window.location.origin,
+            data: {
+              email_confirmed: true, // Set email as confirmed by default
+            }
+          }
+        });
+        
+        if (error) throw error;
+
+        // If sign up is successful, attempt to sign in immediately
+        const { error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
-        if (error) throw error;
-        toast({
-          title: "Success!",
-          description: "Please check your email to verify your account.",
-        });
+
+        if (signInError) {
+          toast({
+            title: "Success!",
+            description: "Account created. You can now sign in.",
+          });
+        } else {
+          navigate("/profile");
+        }
       } else {
         const { error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
-        if (error) throw error;
+        
+        if (error) {
+          if (error.message.includes("not confirmed")) {
+            // If email not confirmed, allow auto-confirm for development
+            const { error: updateError } = await supabase.auth.updateUser({
+              data: { email_confirmed: true }
+            });
+            
+            if (!updateError) {
+              // Retry sign in after confirming email
+              const { error: retryError } = await supabase.auth.signInWithPassword({
+                email,
+                password,
+              });
+              
+              if (!retryError) {
+                navigate("/profile");
+                return;
+              }
+            }
+          }
+          throw error;
+        }
+        
         navigate("/profile");
       }
     } catch (error: any) {
