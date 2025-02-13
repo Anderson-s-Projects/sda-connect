@@ -198,6 +198,19 @@ const Main = () => {
         <WelcomeSection profile={profile} />
 
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card 
+            className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
+            onClick={() => navigate("/groups")}
+          >
+            <div className="space-y-4">
+              <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
+                <Users className="h-5 w-5 text-green-600" />
+              </div>
+              <h2 className="text-xl font-semibold">Community Groups</h2>
+              <p className="text-muted-foreground">Connect with fellow believers in groups</p>
+            </div>
+          </Card>
+
           <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer">
             <div className="space-y-4">
               <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
@@ -205,16 +218,6 @@ const Main = () => {
               </div>
               <h2 className="text-xl font-semibold">Bible Study</h2>
               <p className="text-muted-foreground">Access daily devotionals and study materials</p>
-            </div>
-          </Card>
-
-          <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer">
-            <div className="space-y-4">
-              <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
-                <Users className="h-5 w-5 text-green-600" />
-              </div>
-              <h2 className="text-xl font-semibold">Community</h2>
-              <p className="text-muted-foreground">Connect with fellow believers</p>
             </div>
           </Card>
 
