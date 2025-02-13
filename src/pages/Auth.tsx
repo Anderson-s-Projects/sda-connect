@@ -21,23 +21,6 @@ const Auth = () => {
 
     try {
       if (isSignUp) {
-        // First, check if user already exists
-        const { data: existingUser } = await supabase
-          .from('profiles')
-          .select()
-          .eq('email', email)
-          .single();
-
-        if (existingUser) {
-          toast({
-            title: "Account exists",
-            description: "This email is already registered. Please sign in instead.",
-            variant: "destructive",
-          });
-          setIsSignUp(false);
-          return;
-        }
-
         // Create new account
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
@@ -47,7 +30,18 @@ const Auth = () => {
           }
         });
 
-        if (signUpError) throw signUpError;
+        if (signUpError) {
+          if (signUpError.message.includes("User already registered")) {
+            toast({
+              title: "Account exists",
+              description: "This email is already registered. Please sign in instead.",
+              variant: "destructive",
+            });
+            setIsSignUp(false);
+            return;
+          }
+          throw signUpError;
+        }
 
         toast({
           title: "Account created!",
