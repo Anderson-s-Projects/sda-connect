@@ -1,32 +1,52 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 const Auth = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
+  const [showEmailConfirmation, setShowEmailConfirmation] = useState(false);
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  useEffect(() => {
+    // Check if user is already logged in
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        navigate("/profile");
+      }
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        navigate("/profile");
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, [navigate]);
 
   const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    setShowEmailConfirmation(false);
 
     try {
       if (isSignUp) {
-        // Create new account
         const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
-            emailRedirectTo: window.location.origin,
+            emailRedirectTo: `${window.location.origin}/auth`,
           }
         });
 
@@ -38,17 +58,16 @@ const Auth = () => {
               variant: "destructive",
             });
             setIsSignUp(false);
-            return;
+          } else {
+            throw signUpError;
           }
-          throw signUpError;
+        } else {
+          setShowEmailConfirmation(true);
+          toast({
+            title: "Verification email sent",
+            description: "Please check your email to confirm your account.",
+          });
         }
-
-        toast({
-          title: "Account created!",
-          description: "Please sign in with your new account.",
-        });
-        
-        setIsSignUp(false);
       } else {
         const { data, error: signInError } = await supabase.auth.signInWithPassword({
           email,
@@ -56,25 +75,26 @@ const Auth = () => {
         });
 
         if (signInError) {
-          if (signInError.message.includes("Invalid login credentials")) {
+          if (signInError.message.includes("Email not confirmed")) {
+            setShowEmailConfirmation(true);
+            toast({
+              title: "Email not confirmed",
+              description: "Please check your email and confirm your account before signing in.",
+              variant: "destructive",
+            });
+          } else if (signInError.message.includes("Invalid login credentials")) {
             toast({
               title: "Sign in failed",
               description: "Please check your email and password and try again.",
               variant: "destructive",
             });
-            return;
+          } else {
+            throw signInError;
           }
-          throw signInError;
         }
 
-        if (data.session) {
+        if (data?.session) {
           navigate("/profile");
-        } else {
-          toast({
-            title: "Error",
-            description: "Something went wrong. Please try again.",
-            variant: "destructive",
-          });
         }
       }
     } catch (error: any) {
@@ -95,6 +115,16 @@ const Auth = () => {
         <h1 className="text-2xl font-bold text-center">
           {isSignUp ? "Create Account" : "Welcome Back"}
         </h1>
+        
+        {showEmailConfirmation && (
+          <Alert>
+            <AlertDescription>
+              Please check your email and click the confirmation link to verify your account.
+              Once verified, you can sign in.
+            </AlertDescription>
+          </Alert>
+        )}
+
         <form onSubmit={handleAuth} className="space-y-4">
           <div className="space-y-2">
             <label htmlFor="email" className="text-sm font-medium">
@@ -134,7 +164,10 @@ const Auth = () => {
         <div className="text-center">
           <button
             type="button"
-            onClick={() => setIsSignUp(!isSignUp)}
+            onClick={() => {
+              setIsSignUp(!isSignUp);
+              setShowEmailConfirmation(false);
+            }}
             className="text-sm text-blue-600 hover:underline"
           >
             {isSignUp
