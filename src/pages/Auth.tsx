@@ -49,35 +49,26 @@ const Auth = () => {
           navigate("/profile");
         }
       } else {
-        const { error } = await supabase.auth.signInWithPassword({
+        const { data: { session }, error } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
         
         if (error) {
-          if (error.message.includes("not confirmed")) {
-            // If email not confirmed, allow auto-confirm for development
-            const { error: updateError } = await supabase.auth.updateUser({
-              data: { email_confirmed: true }
+          if (error.message.includes("Invalid login credentials")) {
+            toast({
+              title: "Error",
+              description: "Incorrect email or password. Please try again.",
+              variant: "destructive",
             });
-            
-            if (!updateError) {
-              // Retry sign in after confirming email
-              const { error: retryError } = await supabase.auth.signInWithPassword({
-                email,
-                password,
-              });
-              
-              if (!retryError) {
-                navigate("/profile");
-                return;
-              }
-            }
+            return;
           }
           throw error;
         }
         
-        navigate("/profile");
+        if (session) {
+          navigate("/profile");
+        }
       }
     } catch (error: any) {
       toast({
