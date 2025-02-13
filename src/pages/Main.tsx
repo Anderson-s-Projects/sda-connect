@@ -4,7 +4,8 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { User, Book, Users, Calendar, Settings } from "lucide-react";
+import { User, Book, Users, Calendar, Settings, 
+         Video, Music, Prayer, Bible, Share2 } from "lucide-react";
 
 interface UserProfile {
   username: string;
@@ -16,6 +17,8 @@ const Main = () => {
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [featuredContent, setFeaturedContent] = useState([]);
+  const [recentActivities, setRecentActivities] = useState([]);
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -24,6 +27,8 @@ const Main = () => {
       try {
         await checkUser();
         await loadProfile();
+        await loadFeaturedContent();
+        await loadRecentActivities();
       } catch (err) {
         setError(err instanceof Error ? err.message : "An unexpected error occurred");
       } finally {
@@ -34,31 +39,39 @@ const Main = () => {
     initialize();
   }, []);
 
-  const checkUser = async () => {
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      navigate("/auth");
+  const loadFeaturedContent = async () => {
+    try {
+      const { data, error } = await supabase
+        .from("featured_content")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(3);
+
+      if (error) throw error;
+      setFeaturedContent(data);
+    } catch (err) {
+      toast({
+        title: "Error loading featured content",
+        description: err instanceof Error ? err.message : "Failed to load content",
+        variant: "destructive",
+      });
     }
   };
 
-  const loadProfile = async () => {
+  const loadRecentActivities = async () => {
     try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) return;
-
       const { data, error } = await supabase
-        .from("profiles")
+        .from("activities")
         .select("*")
-        .eq("id", session.user.id)
-        .single();
+        .order("created_at", { ascending: false })
+        .limit(5);
 
       if (error) throw error;
-      if (data) setProfile(data as UserProfile);
+      setRecentActivities(data);
     } catch (err) {
-      const message = err instanceof Error ? err.message : "Failed to load profile";
       toast({
-        title: "Error loading profile",
-        description: message,
+        title: "Error loading activities",
+        description: err instanceof Error ? err.message : "Failed to load activities",
         variant: "destructive",
       });
     }
@@ -96,7 +109,7 @@ const Main = () => {
               </h2>
               <p className="text-muted-foreground">{error}</p>
               <Button 
-                onClick={loadProfile}
+                onClick={() => window.location.reload()}
                 className="mt-4"
               >
                 Try Again
@@ -138,6 +151,39 @@ const Main = () => {
           </div>
         </Card>
 
+        {/* Featured Content */}
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">Featured Content</h2>
+            <Button 
+              variant="outline" 
+              onClick={() => navigate("/content")}
+              className="transition-all duration-300 hover:bg-primary hover:text-primary-foreground"
+            >
+              View All
+            </Button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {featuredContent.map((item) => (
+              <Card 
+                key={item.id}
+                className="p-4 hover:shadow-lg transition-all duration-300 cursor-pointer"
+                onClick={() => navigate(`/content/${item.id}`)}
+              >
+                <div className="space-y-3">
+                  <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
+                    <Video className="h-12 w-12 text-muted-foreground" />
+                  </div>
+                  <h3 className="font-semibold text-lg">{item.title}</h3>
+                  <p className="text-sm text-muted-foreground">
+                    {item.description.substring(0, 100)}...
+                  </p>
+                </div>
+              </Card>
+            ))}
+          </div>
+        </Card>
+
         {/* Quick Actions */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
           <Card 
@@ -146,7 +192,7 @@ const Main = () => {
           >
             <div className="space-y-5">
               <div className="h-12 w-12 rounded-full bg-blue-100 flex items-center justify-center group-hover:scale-105 transition-transform">
-                <Book className="h-6 w-6 text-blue-600" />
+                <Bible className="h-6 w-6 text-blue-600" />
               </div>
               <h2 className="text-xl font-semibold text-primary">
                 Bible Study
@@ -191,6 +237,39 @@ const Main = () => {
             </div>
           </Card>
         </div>
+
+        {/* Recent Activities */}
+        <Card className="p-6">
+          <div className="flex items-center justify-between mb-4">
+            <h2 className="text-xl font-semibold">Recent Activities</h2>
+            <Button 
+              variant="outline" 
+              onClick={() => navigate("/activities")}
+              className="transition-all duration-300 hover:bg-primary hover:text-primary-foreground"
+            >
+              View All
+            </Button>
+          </div>
+          <div className="space-y-4">
+            {recentActivities.map((activity) => (
+              <div 
+                key={activity.id}
+                className="p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors cursor-pointer"
+                onClick={() => navigate(`/activities/${activity.id}`)}
+              >
+                <div className="flex items-start space-x-4">
+                  <Prayer className="h-6 w-6 mt-1 text-primary" />
+                  <div>
+                    <h3 className="font-semibold">{activity.title}</h3>
+                    <p className="text-sm text-muted-foreground">
+                      {activity.description.substring(0, 100)}...
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </Card>
 
         {/* Ministry Interests */}
         {profile?.ministry_interests && profile.ministry_interests.length > 0 && (
