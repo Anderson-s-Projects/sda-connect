@@ -87,6 +87,8 @@ const Profile = () => {
         title: "Success",
         description: "Profile updated successfully",
       });
+      
+      navigate("/main");
     } catch (error: any) {
       toast({
         title: "Error",
