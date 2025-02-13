@@ -21,56 +21,70 @@ const Auth = () => {
 
     try {
       if (isSignUp) {
-        const { data, error } = await supabase.auth.signUp({
+        // First, check if user already exists
+        const { data: existingUser } = await supabase
+          .from('profiles')
+          .select()
+          .eq('email', email)
+          .single();
+
+        if (existingUser) {
+          toast({
+            title: "Account exists",
+            description: "This email is already registered. Please sign in instead.",
+            variant: "destructive",
+          });
+          setIsSignUp(false);
+          return;
+        }
+
+        // Create new account
+        const { data, error: signUpError } = await supabase.auth.signUp({
           email,
           password,
           options: {
             emailRedirectTo: window.location.origin,
-            data: {
-              email_confirmed: true, // Set email as confirmed by default
-            }
           }
         });
-        
-        if (error) throw error;
 
-        // If sign up is successful, attempt to sign in immediately
-        const { error: signInError } = await supabase.auth.signInWithPassword({
+        if (signUpError) throw signUpError;
+
+        toast({
+          title: "Account created!",
+          description: "Please sign in with your new account.",
+        });
+        
+        setIsSignUp(false);
+      } else {
+        const { data, error: signInError } = await supabase.auth.signInWithPassword({
           email,
           password,
         });
 
         if (signInError) {
-          toast({
-            title: "Success!",
-            description: "Account created. You can now sign in.",
-          });
-        } else {
-          navigate("/profile");
-        }
-      } else {
-        const { data: { session }, error } = await supabase.auth.signInWithPassword({
-          email,
-          password,
-        });
-        
-        if (error) {
-          if (error.message.includes("Invalid login credentials")) {
+          if (signInError.message.includes("Invalid login credentials")) {
             toast({
-              title: "Error",
-              description: "Incorrect email or password. Please try again.",
+              title: "Sign in failed",
+              description: "Please check your email and password and try again.",
               variant: "destructive",
             });
             return;
           }
-          throw error;
+          throw signInError;
         }
-        
-        if (session) {
+
+        if (data.session) {
           navigate("/profile");
+        } else {
+          toast({
+            title: "Error",
+            description: "Something went wrong. Please try again.",
+            variant: "destructive",
+          });
         }
       }
     } catch (error: any) {
+      console.error("Auth error:", error);
       toast({
         title: "Error",
         description: error.message,
@@ -112,6 +126,7 @@ const Auth = () => {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              minLength={6}
             />
           </div>
           <Button type="submit" className="w-full" disabled={isLoading}>
