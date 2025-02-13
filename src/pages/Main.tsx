@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -5,7 +6,7 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { User, Book, Users, Calendar, Settings, 
-         Video, Music, Prayer, Share2 } from "lucide-react";
+         Video, Music, PrayingHands, Share2 } from "lucide-react";
 
 interface UserProfile {
   username: string;
@@ -15,21 +16,21 @@ interface UserProfile {
 
 // New interfaces for additional content types
 interface PrayerRequest {
-  id: number;
+  id: string;
   title: string;
   description: string;
   created_at: string;
 }
 
 interface NewsPost {
-  id: number;
+  id: string;
   title: string;
   content: string;
   author: string;
 }
 
 interface Resource {
-  id: number;
+  id: string;
   title: string;
   description: string;
   category: string;
@@ -140,7 +141,7 @@ const Main = () => {
         .limit(5);
 
       if (error) throw error;
-      setPrayerRequests(data);
+      setPrayerRequests(data || []);
     } catch (err) {
       toast({
         title: "Error loading prayer requests",
@@ -159,7 +160,7 @@ const Main = () => {
         .limit(3);
 
       if (error) throw error;
-      setCommunityNews(data);
+      setCommunityNews(data || []);
     } catch (err) {
       toast({
         title: "Error loading community news",
@@ -178,7 +179,7 @@ const Main = () => {
         .limit(4);
 
       if (error) throw error;
-      setResources(data);
+      setResources(data || []);
     } catch (err) {
       toast({
         title: "Error loading resources",
@@ -265,6 +266,7 @@ const Main = () => {
             </div>
           </Card>
         )}
+
         {/* Prayer Requests Section */}
         <Card className="p-6">
           <div className="flex items-center justify-between mb-4">
@@ -285,7 +287,7 @@ const Main = () => {
                 onClick={() => navigate(`/prayer-requests/${request.id}`)}
               >
                 <div className="flex items-start space-x-4">
-                  <Prayer className="h-6 w-6 mt-1 text-primary" />
+                  <PrayingHands className="h-6 w-6 mt-1 text-primary" />
                   <div>
                     <h3 className="font-semibold">{request.title}</h3>
                     <p className="text-sm text-muted-foreground">

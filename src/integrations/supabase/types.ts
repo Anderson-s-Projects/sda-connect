@@ -66,6 +66,36 @@ export type Database = {
         }
         Relationships: []
       }
+      community_news: {
+        Row: {
+          author: string
+          content: string
+          created_at: string
+          id: string
+          title: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          author: string
+          content: string
+          created_at?: string
+          id?: string
+          title: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          author?: string
+          content?: string
+          created_at?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       divisions: {
         Row: {
           church_count: number | null
@@ -212,6 +242,33 @@ export type Database = {
         }
         Relationships: []
       }
+      prayer_requests: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          title: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          title: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          title?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           about: string | null
@@ -259,6 +316,7 @@ export type Database = {
       }
       resources: {
         Row: {
+          category: string
           created_at: string
           created_by: string | null
           description: string | null
@@ -271,6 +329,7 @@ export type Database = {
           url: string | null
         }
         Insert: {
+          category?: string
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -283,6 +342,7 @@ export type Database = {
           url?: string | null
         }
         Update: {
+          category?: string
           created_at?: string
           created_by?: string | null
           description?: string | null
