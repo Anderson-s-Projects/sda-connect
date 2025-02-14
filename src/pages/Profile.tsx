@@ -7,7 +7,7 @@ import { Card } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, Share2, Prayer, Book, Music, Video, Upload } from "lucide-react";
+import { Users, Share2, Heart, Book, Music, Video, Upload } from "lucide-react";
 
 interface ProfileData {
   username: string;
@@ -59,19 +59,23 @@ const Profile = () => {
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       navigate("/auth");
+      return;
     }
   };
 
   const loadProfile = async () => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) return;
+      if (!session?.user) {
+        navigate("/auth");
+        return;
+      }
 
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
         .eq("id", session.user.id)
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
 
@@ -129,7 +133,10 @@ const Profile = () => {
 
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) throw new Error("No user logged in");
+      if (!session?.user) {
+        navigate("/auth");
+        return;
+      }
 
       const { error } = await supabase
         .from("profiles")
@@ -212,7 +219,6 @@ const Profile = () => {
         </div>
 
         <form onSubmit={handleSave} className="space-y-6">
-          {/* Profile Image Section */}
           <div className="space-y-4">
             <div className="flex justify-center">
               <Avatar className="w-32 h-32">
@@ -241,7 +247,6 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Basic Information */}
           <div className="space-y-4">
             <div className="space-y-2">
               <label htmlFor="username" className="text-sm font-medium">
@@ -287,7 +292,6 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Ministry Interests */}
           <div className="space-y-2">
             <label className="text-sm font-medium">Ministry Interests</label>
             <div className="flex flex-wrap gap-2">
@@ -304,7 +308,6 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Prayer Requests */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium">Prayer Requests</label>
@@ -313,7 +316,7 @@ const Profile = () => {
                 variant="outline"
                 onClick={() => addPrayerRequest(`Prayer request ${profileData.prayer_requests.length + 1}`)}
               >
-                <Prayer className="mr-2 h-4 w-4" />
+                <Heart className="mr-2 h-4 w-4" />
                 Add Request
               </Button>
             </div>
@@ -326,7 +329,6 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Community Involvement */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium">Community Involvement</label>
@@ -348,7 +350,6 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Shared Resources */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium">Shared Resources</label>
@@ -378,7 +379,6 @@ const Profile = () => {
             </div>
           </div>
 
-          {/* Social Connections */}
           <div className="space-y-4">
             <div className="flex items-center justify-between">
               <label className="text-sm font-medium">Social Connections</label>
