@@ -1,28 +1,30 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { Card } from "@/components/ui/card";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Users, Share2, Heart, Book, Music, Video, Upload } from "lucide-react";
+import { ProfileImage } from "@/components/profile/ProfileImage";
+import { BasicInfo } from "@/components/profile/BasicInfo";
+import { MinistryInterests } from "@/components/profile/MinistryInterests";
+import { PrayerRequests } from "@/components/profile/PrayerRequests";
 
 interface ProfileData {
   username: string;
   church_affiliation: string;
   ministry_interests: string[];
   bio: string;
+  about: string;
+  avatar_url: string;
   prayer_requests: string[];
-  community_involvement: string[];
-  shared_resources: {
-    title: string;
-    description: string;
-    category: string;
-  }[];
-  social_connections: string[];
-  profile_image: string | null;
+  full_name: string;
+  id: string;
+  location: string;
+  privacy_settings: any;
+  created_at: string;
+  updated_at: string;
+  favorite_bible_verse: string;
 }
 
 const MINISTRY_OPTIONS = [
@@ -40,13 +42,18 @@ const Profile = () => {
     church_affiliation: "",
     ministry_interests: [],
     bio: "",
+    about: "",
+    avatar_url: "",
     prayer_requests: [],
-    community_involvement: [],
-    shared_resources: [],
-    social_connections: [],
-    profile_image: null
+    full_name: "",
+    id: "",
+    location: "",
+    privacy_settings: {},
+    created_at: "",
+    updated_at: "",
+    favorite_bible_verse: "",
   });
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -80,17 +87,7 @@ const Profile = () => {
       if (error) throw error;
 
       if (data) {
-        setProfileData({
-          username: data.username || "",
-          church_affiliation: data.church_affiliation || "",
-          ministry_interests: data.ministry_interests || [],
-          bio: data.bio || "",
-          prayer_requests: data.prayer_requests || [],
-          community_involvement: data.community_involvement || [],
-          shared_resources: data.shared_resources || [],
-          social_connections: data.social_connections || [],
-          profile_image: data.profile_image
-        });
+        setProfileData(data);
       }
     } catch (error: any) {
       toast({
@@ -116,15 +113,37 @@ const Profile = () => {
       return;
     }
 
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setSelectedImage(reader.result as string);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        navigate("/auth");
+        return;
+      }
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${session.user.id}-${Math.random()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(fileName);
+
       setProfileData(prev => ({
         ...prev,
-        profile_image: reader.result as string
+        avatar_url: publicUrl
       }));
-    };
-    reader.readAsDataURL(file);
+
+    } catch (error: any) {
+      toast({
+        title: "Error uploading image",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
   };
 
   const handleSave = async (e: React.FormEvent) => {
@@ -167,43 +186,6 @@ const Profile = () => {
     navigate("/auth");
   };
 
-  const toggleMinistry = (ministry: string) => {
-    setProfileData(prev => ({
-      ...prev,
-      ministry_interests: prev.ministry_interests.includes(ministry)
-        ? prev.ministry_interests.filter(m => m !== ministry)
-        : [...prev.ministry_interests, ministry]
-    }));
-  };
-
-  const addPrayerRequest = (request: string) => {
-    setProfileData(prev => ({
-      ...prev,
-      prayer_requests: [...prev.prayer_requests, request]
-    }));
-  };
-
-  const addCommunityInvolvement = (involvement: string) => {
-    setProfileData(prev => ({
-      ...prev,
-      community_involvement: [...prev.community_involvement, involvement]
-    }));
-  };
-
-  const addSharedResource = (resource: { title: string; description: string; category: string }) => {
-    setProfileData(prev => ({
-      ...prev,
-      shared_resources: [...prev.shared_resources, resource]
-    }));
-  };
-
-  const addSocialConnection = (username: string) => {
-    setProfileData(prev => ({
-      ...prev,
-      social_connections: [...prev.social_connections, username]
-    }));
-  };
-
   if (loading) {
     return <div className="text-center p-4">Loading...</div>;
   }
@@ -219,186 +201,43 @@ const Profile = () => {
         </div>
 
         <form onSubmit={handleSave} className="space-y-6">
-          <div className="space-y-4">
-            <div className="flex justify-center">
-              <Avatar className="w-32 h-32">
-                {profileData.profile_image ? (
-                  <AvatarImage src={profileData.profile_image} alt={profileData.username} />
-                ) : (
-                  <AvatarFallback>
-                    {profileData.username?.charAt(0)?.toUpperCase() || "U"}
-                  </AvatarFallback>
-                )}
-              </Avatar>
-            </div>
-            <div className="flex justify-center">
-              <label className="cursor-pointer">
-                <Button variant="outline" className="w-full">
-                  <Upload className="mr-2 h-4 w-4" />
-                  Change Profile Image
-                </Button>
-                <Input
-                  type="file"
-                  accept="image/*"
-                  onChange={handleImageUpload}
-                  className="hidden"
-                />
-              </label>
-            </div>
-          </div>
+          <ProfileImage
+            imageUrl={profileData.avatar_url}
+            username={profileData.username}
+            onImageChange={handleImageUpload}
+          />
 
-          <div className="space-y-4">
-            <div className="space-y-2">
-              <label htmlFor="username" className="text-sm font-medium">
-                Username
-              </label>
-              <Input
-                id="username"
-                value={profileData.username}
-                onChange={(e) => setProfileData(prev => ({
-                  ...prev,
-                  username: e.target.value
-                }))}
-                placeholder="Enter your username"
-              />
-            </div>
+          <BasicInfo
+            username={profileData.username}
+            churchAffiliation={profileData.church_affiliation}
+            bio={profileData.bio || profileData.about}
+            onUsernameChange={(value) => setProfileData(prev => ({ ...prev, username: value }))}
+            onChurchChange={(value) => setProfileData(prev => ({ ...prev, church_affiliation: value }))}
+            onBioChange={(value) => setProfileData(prev => ({ ...prev, bio: value, about: value }))}
+          />
 
-            <div className="space-y-2">
-              <label htmlFor="church" className="text-sm font-medium">
-                Church Affiliation
-              </label>
-              <Input
-                id="church"
-                value={profileData.church_affiliation}
-                onChange={(e) => setProfileData(prev => ({
-                  ...prev,
-                  church_affiliation: e.target.value
-                }))}
-                placeholder="Enter your church affiliation"
-              />
-            </div>
+          <MinistryInterests
+            interests={profileData.ministry_interests}
+            options={MINISTRY_OPTIONS}
+            onToggle={(ministry) => {
+              setProfileData(prev => ({
+                ...prev,
+                ministry_interests: prev.ministry_interests.includes(ministry)
+                  ? prev.ministry_interests.filter(m => m !== ministry)
+                  : [...prev.ministry_interests, ministry]
+              }));
+            }}
+          />
 
-            <div className="space-y-2">
-              <label className="text-sm font-medium">Personal Bio</label>
-              <Textarea
-                value={profileData.bio}
-                onChange={(e) => setProfileData(prev => ({
-                  ...prev,
-                  bio: e.target.value
-                }))}
-                placeholder="Tell us about yourself..."
-                className="min-h-[100px]"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <label className="text-sm font-medium">Ministry Interests</label>
-            <div className="flex flex-wrap gap-2">
-              {MINISTRY_OPTIONS.map((ministry) => (
-                <Button
-                  key={ministry}
-                  type="button"
-                  variant={profileData.ministry_interests.includes(ministry) ? "default" : "outline"}
-                  onClick={() => toggleMinistry(ministry)}
-                >
-                  {ministry}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">Prayer Requests</label>
-              <Button 
-                type="button" 
-                variant="outline"
-                onClick={() => addPrayerRequest(`Prayer request ${profileData.prayer_requests.length + 1}`)}
-              >
-                <Heart className="mr-2 h-4 w-4" />
-                Add Request
-              </Button>
-            </div>
-            <div className="space-y-2">
-              {profileData.prayer_requests.map((request, index) => (
-                <Card key={index} className="p-4">
-                  <p className="text-sm">{request}</p>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">Community Involvement</label>
-              <Button 
-                type="button" 
-                variant="outline"
-                onClick={() => addCommunityInvolvement(`Involvement ${profileData.community_involvement.length + 1}`)}
-              >
-                <Users className="mr-2 h-4 w-4" />
-                Add Involvement
-              </Button>
-            </div>
-            <div className="space-y-2">
-              {profileData.community_involvement.map((involvement, index) => (
-                <Card key={index} className="p-4">
-                  <p className="text-sm">{involvement}</p>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">Shared Resources</label>
-              <Button 
-                type="button" 
-                variant="outline"
-                onClick={() => addSharedResource({
-                  title: `Resource ${profileData.shared_resources.length + 1}`,
-                  description: `Description for resource ${profileData.shared_resources.length + 1}`,
-                  category: "General"
-                })}
-              >
-                <Share2 className="mr-2 h-4 w-4" />
-                Add Resource
-              </Button>
-            </div>
-            <div className="space-y-2">
-              {profileData.shared_resources.map((resource, index) => (
-                <Card key={index} className="p-4">
-                  <h4 className="font-semibold">{resource.title}</h4>
-                  <p className="text-sm text-muted-foreground">{resource.description}</p>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    Category: {resource.category}
-                  </p>
-                </Card>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-4">
-            <div className="flex items-center justify-between">
-              <label className="text-sm font-medium">Social Connections</label>
-              <Button 
-                type="button" 
-                variant="outline"
-                onClick={() => addSocialConnection(`user${profileData.social_connections.length + 1}`)}
-              >
-                <Users className="mr-2 h-4 w-4" />
-                Add Connection
-              </Button>
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {profileData.social_connections.map((connection, index) => (
-                <Card key={index} className="p-2">
-                  <p className="text-sm">{connection}</p>
-                </Card>
-              ))}
-            </div>
-          </div>
+          <PrayerRequests
+            requests={profileData.prayer_requests || []}
+            onAddRequest={() => {
+              setProfileData(prev => ({
+                ...prev,
+                prayer_requests: [...(prev.prayer_requests || []), `Prayer request ${(prev.prayer_requests || []).length + 1}`]
+              }));
+            }}
+          />
 
           <Button type="submit" className="w-full" disabled={loading}>
             {loading ? "Saving..." : "Save Changes"}
