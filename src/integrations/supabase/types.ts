@@ -339,6 +339,7 @@ export type Database = {
           id: string
           location: string | null
           ministry_interests: string[] | null
+          prayer_requests: string[] | null
           privacy_settings: Json | null
           updated_at: string
           username: string | null
@@ -353,6 +354,7 @@ export type Database = {
           id: string
           location?: string | null
           ministry_interests?: string[] | null
+          prayer_requests?: string[] | null
           privacy_settings?: Json | null
           updated_at?: string
           username?: string | null
@@ -367,6 +369,7 @@ export type Database = {
           id?: string
           location?: string | null
           ministry_interests?: string[] | null
+          prayer_requests?: string[] | null
           privacy_settings?: Json | null
           updated_at?: string
           username?: string | null

@@ -57,8 +57,8 @@ export const useProfileData = () => {
           ...initialProfileData,
           ...data,
           bio: data.about || "",
-          prayer_requests: data.prayer_requests || [],
-          ministry_interests: data.ministry_interests || []
+          prayer_requests: Array.isArray(data.prayer_requests) ? data.prayer_requests : [],
+          ministry_interests: Array.isArray(data.ministry_interests) ? data.ministry_interests : []
         });
       }
     } catch (error: any) {
