@@ -87,7 +87,13 @@ const Profile = () => {
       if (error) throw error;
 
       if (data) {
-        setProfileData(data);
+        setProfileData({
+          ...profileData,
+          ...data,
+          bio: data.bio || data.about || "",
+          prayer_requests: data.prayer_requests || [],
+          ministry_interests: data.ministry_interests || []
+        });
       }
     } catch (error: any) {
       toast({
