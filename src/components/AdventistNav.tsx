@@ -6,29 +6,78 @@ import {
   Bell, User, Sun, Moon, Menu, X, Plus
 } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface NavItemProps {
   icon: React.ElementType;
   label: string;
   primary: boolean;
   to: string;
+  description: string;
 }
 
 const navItems: NavItemProps[] = [
-  { icon: Home, label: 'Home', to: '/', primary: true },
-  { icon: Compass, label: 'Explore', to: '/main', primary: true },
-  { icon: Users, label: 'Groups', to: '/groups', primary: true },
-  { icon: Calendar, label: 'Events', to: '/events', primary: true },
-  { icon: Heart, label: 'Prayer', to: '/prayer', primary: true },
-  { icon: Bell, label: 'Notifications', to: '/notifications', primary: false },
-  { icon: User, label: 'Profile', to: '/profile', primary: false },
+  { 
+    icon: Home, 
+    label: 'Home', 
+    to: '/', 
+    primary: true,
+    description: 'Your main feed with latest posts, updates, and personalized content from your community'
+  },
+  { 
+    icon: Compass, 
+    label: 'Explore', 
+    to: '/main', 
+    primary: true,
+    description: 'Discover new content, trending topics, and spiritual resources'
+  },
+  { 
+    icon: Users, 
+    label: 'Groups', 
+    to: '/groups', 
+    primary: true,
+    description: 'Join interest-based congregations, local church groups, and study forums'
+  },
+  { 
+    icon: Calendar, 
+    label: 'Events', 
+    to: '/events', 
+    primary: true,
+    description: 'Access your calendar for church services, gatherings, and spiritual events'
+  },
+  { 
+    icon: Heart, 
+    label: 'Prayer', 
+    to: '/prayer', 
+    primary: true,
+    description: 'Share prayer requests, receive spiritual support, and connect with prayer partners'
+  },
+  { 
+    icon: Bell, 
+    label: 'Notifications', 
+    to: '/notifications', 
+    primary: false,
+    description: 'Stay updated on messages, events, and community activities'
+  },
+  { 
+    icon: User, 
+    label: 'Profile', 
+    to: '/profile', 
+    primary: false,
+    description: 'Manage your account, privacy settings, and spiritual journey'
+  },
 ];
 
-const NavItem = ({ icon: Icon, label, primary, to }: NavItemProps) => {
+const NavItem = ({ icon: Icon, label, primary, to, description }: NavItemProps) => {
   const isMobile = useIsMobile();
   const [isSabbathMode] = useState(false); // This should be moved to a context if needed across components
 
-  return (
+  const content = (
     <Link
       to={to}
       className={`flex flex-col items-center justify-center px-4 py-2 rounded-lg transition-all duration-300
@@ -40,6 +89,21 @@ const NavItem = ({ icon: Icon, label, primary, to }: NavItemProps) => {
       <Icon className={`h-6 w-6 mb-1 ${isSabbathMode ? 'text-slate-700' : 'text-blue-600'}`} />
       <span className={isSabbathMode ? 'text-slate-700' : 'text-blue-600'}>{label}</span>
     </Link>
+  );
+
+  return isMobile ? (
+    content
+  ) : (
+    <TooltipProvider>
+      <Tooltip delayDuration={300}>
+        <TooltipTrigger asChild>
+          {content}
+        </TooltipTrigger>
+        <TooltipContent className="max-w-xs p-4">
+          <p className="text-sm">{description}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 
@@ -70,14 +134,23 @@ const AdventistNav = () => {
             </div>
 
             {/* Sabbath Mode Toggle */}
-            <button
-              onClick={() => setSabbathMode(!isSabbathMode)}
-              className={`p-2 rounded-lg transition-all duration-300
-                ${isSabbathMode ? 'bg-slate-200 text-slate-700' : 'bg-blue-50 text-blue-600'}
-              `}
-            >
-              {isSabbathMode ? <Moon className="h-6 w-6" /> : <Sun className="h-6 w-6" />}
-            </button>
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setSabbathMode(!isSabbathMode)}
+                    className={`p-2 rounded-lg transition-all duration-300
+                      ${isSabbathMode ? 'bg-slate-200 text-slate-700' : 'bg-blue-50 text-blue-600'}
+                    `}
+                  >
+                    {isSabbathMode ? <Moon className="h-6 w-6" /> : <Sun className="h-6 w-6" />}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Toggle Sabbath Mode</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
 
             {/* Mobile Menu Button */}
             <button
@@ -102,14 +175,23 @@ const AdventistNav = () => {
           )}
 
           {/* Create Post FAB */}
-          <button
-            className={`fixed bottom-20 right-6 md:bottom-6 p-4 rounded-full shadow-lg transition-all duration-300
-              ${isSabbathMode ? 'bg-slate-700 text-white' : 'bg-blue-600 text-white'}
-              hover:shadow-xl hover:scale-105
-            `}
-          >
-            <Plus className="h-6 w-6" />
-          </button>
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <button
+                  className={`fixed bottom-20 right-6 md:bottom-6 p-4 rounded-full shadow-lg transition-all duration-300
+                    ${isSabbathMode ? 'bg-slate-700 text-white' : 'bg-blue-600 text-white'}
+                    hover:shadow-xl hover:scale-105
+                  `}
+                >
+                  <Plus className="h-6 w-6" />
+                </button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Create New Post</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </nav>
       </div>
     </div>
