@@ -4,6 +4,7 @@ import { Link } from "react-router-dom";
 import { ChevronRight, Heart, Users, Calendar, Book } from "lucide-react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
+import AdventistNav from "@/components/AdventistNav";
 
 const Features = [
   {
@@ -49,33 +50,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen flex flex-col items-center">
-      <nav className="w-full glass fixed top-0 z-50 px-6 py-4">
-        <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <h1 className="text-2xl font-bold text-primary">SDA Connect</h1>
-          <div className="flex gap-4">
-            {isAuthenticated ? (
-              <Link to="/profile">
-                <button className="px-4 py-2 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors">
-                  Profile
-                </button>
-              </Link>
-            ) : (
-              <>
-                <Link to="/auth">
-                  <button className="px-4 py-2 rounded-full text-primary hover:bg-white/50 transition-colors">
-                    Sign In
-                  </button>
-                </Link>
-                <Link to="/auth">
-                  <button className="px-4 py-2 rounded-full bg-secondary text-secondary-foreground hover:bg-secondary/80 transition-colors">
-                    Join Now
-                  </button>
-                </Link>
-              </>
-            )}
-          </div>
-        </div>
-      </nav>
+      <AdventistNav />
 
       <main className="mt-32 w-full px-6">
         <div className="max-w-7xl mx-auto">
