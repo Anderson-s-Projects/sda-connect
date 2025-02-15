@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Card } from "@/components/ui/card";
@@ -11,8 +12,12 @@ interface Group {
   id: string;
   name: string;
   description: string;
-  member_count: number;
+  members_count: number; // Changed from member_count to members_count to match DB schema
   created_at: string;
+  updated_at: string;
+  created_by: string | null;
+  image_url: string | null;
+  type: string;
 }
 
 const Groups = () => {
@@ -130,7 +135,7 @@ const Groups = () => {
               <p className="text-muted-foreground mb-4">{group.description}</p>
               <div className="flex items-center text-sm text-muted-foreground">
                 <Users className="h-4 w-4 mr-2" />
-                {group.member_count} members
+                {group.members_count} members
               </div>
             </Card>
           ))}
