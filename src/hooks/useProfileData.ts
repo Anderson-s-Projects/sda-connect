@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
@@ -18,6 +19,19 @@ const initialProfileData: ProfileData = {
   created_at: "",
   updated_at: "",
   favorite_bible_verse: "",
+  cover_photo_url: null,
+  bio: null,
+  professional_accomplishments: [],
+  skills: [],
+  interests: [],
+  profile_completion_percentage: 0,
+  element_privacy: {
+    email: "private",
+    bio: "public",
+    skills: "public",
+    interests: "public",
+    accomplishments: "public"
+  }
 };
 
 export const useProfileData = () => {
@@ -55,7 +69,12 @@ export const useProfileData = () => {
           ...initialProfileData,
           ...data,
           prayer_requests: Array.isArray(data.prayer_requests) ? data.prayer_requests : [],
-          ministry_interests: Array.isArray(data.ministry_interests) ? data.ministry_interests : []
+          ministry_interests: Array.isArray(data.ministry_interests) ? data.ministry_interests : [],
+          skills: Array.isArray(data.skills) ? data.skills : [],
+          interests: Array.isArray(data.interests) ? data.interests : [],
+          professional_accomplishments: Array.isArray(data.professional_accomplishments) 
+            ? data.professional_accomplishments 
+            : []
         });
       }
     } catch (error: any) {
@@ -114,6 +133,51 @@ export const useProfileData = () => {
     }
   };
 
+  const handleCoverPhotoUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast({
+        title: "Error",
+        description: "Please select a valid image file",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user) {
+        navigate("/auth");
+        return;
+      }
+
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${session.user.id}-${Math.random()}.${fileExt}`;
+      const { error: uploadError } = await supabase.storage
+        .from('covers')
+        .upload(fileName, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('covers')
+        .getPublicUrl(fileName);
+
+      setProfileData(prev => ({
+        ...prev,
+        cover_photo_url: publicUrl
+      }));
+    } catch (error: any) {
+      toast({
+        title: "Error uploading cover photo",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
   const saveProfile = async () => {
     setLoading(true);
 
@@ -136,7 +200,7 @@ export const useProfileData = () => {
         description: "Profile updated successfully",
       });
       
-      navigate("/main");
+      await loadProfile();
     } catch (error: any) {
       toast({
         title: "Error",
@@ -155,6 +219,7 @@ export const useProfileData = () => {
     checkUser,
     loadProfile,
     handleImageUpload,
+    handleCoverPhotoUpload,
     saveProfile
   };
 };

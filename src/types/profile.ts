@@ -13,4 +13,21 @@ export interface ProfileData {
   created_at: string;
   updated_at: string;
   favorite_bible_verse: string;
+  cover_photo_url: string | null;
+  bio: string | null;
+  professional_accomplishments: Array<{
+    title: string;
+    description: string;
+    date: string;
+  }>;
+  skills: string[];
+  interests: string[];
+  profile_completion_percentage: number;
+  element_privacy: {
+    email: 'private' | 'public';
+    bio: 'private' | 'public';
+    skills: 'private' | 'public';
+    interests: 'private' | 'public';
+    accomplishments: 'private' | 'public';
+  };
 }

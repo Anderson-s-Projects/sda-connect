@@ -1,3 +1,4 @@
+
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,8 @@ import { ProfileImage } from "@/components/profile/ProfileImage";
 import { BasicInfo } from "@/components/profile/BasicInfo";
 import { MinistryInterests } from "@/components/profile/MinistryInterests";
 import { PrayerRequests } from "@/components/profile/PrayerRequests";
+import { CoverPhoto } from "@/components/profile/CoverPhoto";
+import { ProfileCompletion } from "@/components/profile/ProfileCompletion";
 import { useProfileData } from "@/hooks/useProfileData";
 import AdventistNav from "@/components/AdventistNav";
 
@@ -26,6 +29,7 @@ const Profile = () => {
     checkUser,
     loadProfile,
     handleImageUpload,
+    handleCoverPhotoUpload,
     saveProfile
   } = useProfileData();
   
@@ -56,60 +60,95 @@ const Profile = () => {
   }
 
   return (
-    <div className="min-h-screen p-4">
+    <div className="min-h-screen bg-gray-50">
       <AdventistNav />
-      <Card className="max-w-2xl mx-auto p-6 space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-2xl font-bold">Profile Settings</h1>
-          <Button onClick={handleLogout} variant="outline">
-            Logout
-          </Button>
-        </div>
-
-        <form onSubmit={handleSave} className="space-y-6">
-          <ProfileImage
-            imageUrl={profileData.avatar_url}
-            username={profileData.username}
-            onImageChange={handleImageUpload}
+      <div className="max-w-4xl mx-auto pb-12">
+        <Card className="mt-6">
+          <CoverPhoto
+            coverPhotoUrl={profileData.cover_photo_url}
+            onPhotoChange={handleCoverPhotoUpload}
           />
+          
+          <div className="p-6">
+            <div className="flex justify-between items-start mb-8">
+              <div className="flex gap-6 items-start">
+                <ProfileImage
+                  imageUrl={profileData.avatar_url}
+                  username={profileData.username}
+                  onImageChange={handleImageUpload}
+                />
+                <div>
+                  <h1 className="text-2xl font-bold">{profileData.username || "New User"}</h1>
+                  <p className="text-muted-foreground">{profileData.church_affiliation}</p>
+                </div>
+              </div>
+              <Button onClick={handleLogout} variant="outline">
+                Logout
+              </Button>
+            </div>
 
-          <BasicInfo
-            username={profileData.username}
-            churchAffiliation={profileData.church_affiliation}
-            about={profileData.about}
-            onUsernameChange={(value) => setProfileData(prev => ({ ...prev, username: value }))}
-            onChurchChange={(value) => setProfileData(prev => ({ ...prev, church_affiliation: value }))}
-            onAboutChange={(value) => setProfileData(prev => ({ ...prev, about: value }))}
-          />
+            <ProfileCompletion percentage={profileData.profile_completion_percentage} />
 
-          <MinistryInterests
-            interests={profileData.ministry_interests}
-            options={MINISTRY_OPTIONS}
-            onToggle={(ministry) => {
-              setProfileData(prev => ({
-                ...prev,
-                ministry_interests: prev.ministry_interests.includes(ministry)
-                  ? prev.ministry_interests.filter(m => m !== ministry)
-                  : [...prev.ministry_interests, ministry]
-              }));
-            }}
-          />
+            <form onSubmit={handleSave} className="space-y-8 mt-8">
+              <BasicInfo
+                username={profileData.username}
+                churchAffiliation={profileData.church_affiliation}
+                about={profileData.about}
+                bio={profileData.bio || ""}
+                skills={profileData.skills || []}
+                interests={profileData.interests || []}
+                onUsernameChange={(value) => setProfileData(prev => ({ ...prev, username: value }))}
+                onChurchChange={(value) => setProfileData(prev => ({ ...prev, church_affiliation: value }))}
+                onAboutChange={(value) => setProfileData(prev => ({ ...prev, about: value }))}
+                onBioChange={(value) => setProfileData(prev => ({ ...prev, bio: value }))}
+                onAddSkill={(skill) => setProfileData(prev => ({
+                  ...prev,
+                  skills: [...(prev.skills || []), skill]
+                }))}
+                onRemoveSkill={(skill) => setProfileData(prev => ({
+                  ...prev,
+                  skills: (prev.skills || []).filter(s => s !== skill)
+                }))}
+                onAddInterest={(interest) => setProfileData(prev => ({
+                  ...prev,
+                  interests: [...(prev.interests || []), interest]
+                }))}
+                onRemoveInterest={(interest) => setProfileData(prev => ({
+                  ...prev,
+                  interests: (prev.interests || []).filter(i => i !== interest)
+                }))}
+              />
 
-          <PrayerRequests
-            requests={profileData.prayer_requests}
-            onAddRequest={() => {
-              setProfileData(prev => ({
-                ...prev,
-                prayer_requests: [...prev.prayer_requests, `Prayer request ${prev.prayer_requests.length + 1}`]
-              }));
-            }}
-          />
+              <MinistryInterests
+                interests={profileData.ministry_interests}
+                options={MINISTRY_OPTIONS}
+                onToggle={(ministry) => {
+                  setProfileData(prev => ({
+                    ...prev,
+                    ministry_interests: prev.ministry_interests.includes(ministry)
+                      ? prev.ministry_interests.filter(m => m !== ministry)
+                      : [...prev.ministry_interests, ministry]
+                  }));
+                }}
+              />
 
-          <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Saving..." : "Save Changes"}
-          </Button>
-        </form>
-      </Card>
+              <PrayerRequests
+                requests={profileData.prayer_requests}
+                onAddRequest={() => {
+                  setProfileData(prev => ({
+                    ...prev,
+                    prayer_requests: [...prev.prayer_requests, `Prayer request ${prev.prayer_requests.length + 1}`]
+                  }));
+                }}
+              />
+
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? "Saving..." : "Save Changes"}
+              </Button>
+            </form>
+          </div>
+        </Card>
+      </div>
     </div>
   );
 };

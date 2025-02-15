@@ -362,45 +362,69 @@ export type Database = {
         Row: {
           about: string | null
           avatar_url: string | null
+          bio: string | null
           church_affiliation: string | null
+          cover_photo_url: string | null
           created_at: string
+          element_privacy: Json | null
           favorite_bible_verse: string | null
           full_name: string | null
           id: string
+          interests: string[] | null
+          last_reminder_sent: string | null
           location: string | null
           ministry_interests: string[] | null
           prayer_requests: string[] | null
           privacy_settings: Json | null
+          professional_accomplishments: Json | null
+          profile_completion_percentage: number | null
+          skills: string[] | null
           updated_at: string
           username: string | null
         }
         Insert: {
           about?: string | null
           avatar_url?: string | null
+          bio?: string | null
           church_affiliation?: string | null
+          cover_photo_url?: string | null
           created_at?: string
+          element_privacy?: Json | null
           favorite_bible_verse?: string | null
           full_name?: string | null
           id: string
+          interests?: string[] | null
+          last_reminder_sent?: string | null
           location?: string | null
           ministry_interests?: string[] | null
           prayer_requests?: string[] | null
           privacy_settings?: Json | null
+          professional_accomplishments?: Json | null
+          profile_completion_percentage?: number | null
+          skills?: string[] | null
           updated_at?: string
           username?: string | null
         }
         Update: {
           about?: string | null
           avatar_url?: string | null
+          bio?: string | null
           church_affiliation?: string | null
+          cover_photo_url?: string | null
           created_at?: string
+          element_privacy?: Json | null
           favorite_bible_verse?: string | null
           full_name?: string | null
           id?: string
+          interests?: string[] | null
+          last_reminder_sent?: string | null
           location?: string | null
           ministry_interests?: string[] | null
           prayer_requests?: string[] | null
           privacy_settings?: Json | null
+          professional_accomplishments?: Json | null
+          profile_completion_percentage?: number | null
+          skills?: string[] | null
           updated_at?: string
           username?: string | null
         }
