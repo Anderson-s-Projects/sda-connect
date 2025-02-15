@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { ChevronRight, Heart, Users, Calendar, Book } from "lucide-react";
 import { motion } from "framer-motion";
 import { supabase } from "@/integrations/supabase/client";
@@ -32,20 +32,31 @@ const Features = [
 const Index = () => {
   const [mounted, setMounted] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     setMounted(true);
     checkUser();
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setIsAuthenticated(!!session);
+      if (session) {
+        navigate('/main');
+      }
     });
 
     return () => subscription.unsubscribe();
-  }, []);
+  }, [navigate]);
 
   const checkUser = async () => {
     const { data: { session } } = await supabase.auth.getSession();
     setIsAuthenticated(!!session);
+    if (session) {
+      navigate('/main');
+    }
+  };
+
+  const handleConnect = () => {
+    navigate('/auth');
   };
 
   return (
@@ -67,12 +78,13 @@ const Index = () => {
               Join a vibrant community of believers dedicated to spiritual growth
               and fellowship
             </p>
-            <Link to="/main">
-              <button className="px-8 py-4 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all transform hover:scale-105 inline-flex items-center gap-2">
-                Connect
-                <ChevronRight className="h-5 w-5" />
-              </button>
-            </Link>
+            <button 
+              onClick={handleConnect}
+              className="px-8 py-4 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 transition-all transform hover:scale-105 inline-flex items-center gap-2"
+            >
+              Connect
+              <ChevronRight className="h-5 w-5" />
+            </button>
           </motion.div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-20">
