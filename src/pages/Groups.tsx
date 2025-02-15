@@ -1,40 +1,37 @@
-
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import { Button } from "@/components/ui/button";
 import { useToast } from "@/components/ui/use-toast";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { Users, Plus } from "lucide-react";
+import AdventistNav from "@/components/AdventistNav";
 
 interface Group {
   id: string;
   name: string;
   description: string;
-  members_count: number;
-  type: string;
-  image_url?: string;
+  member_count: number;
   created_at: string;
 }
 
 const Groups = () => {
-  const [groups, setGroups] = useState<Group[]>([]);
   const [loading, setLoading] = useState(true);
-  const [newGroup, setNewGroup] = useState({
-    name: "",
-    description: "",
-    type: "general"
-  });
-  
+  const [groups, setGroups] = useState<Group[]>([]);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
+    checkUser();
     loadGroups();
   }, []);
+
+  const checkUser = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      navigate("/auth");
+    }
+  };
 
   const loadGroups = async () => {
     try {
@@ -45,10 +42,10 @@ const Groups = () => {
 
       if (error) throw error;
       setGroups(data || []);
-    } catch (error: any) {
+    } catch (err) {
       toast({
         title: "Error loading groups",
-        description: error.message,
+        description: err instanceof Error ? err.message : "Failed to load groups",
         variant: "destructive",
       });
     } finally {
@@ -56,124 +53,104 @@ const Groups = () => {
     }
   };
 
-  const createGroup = async () => {
+  const handleJoinGroup = async (groupId: string) => {
     try {
       const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) {
-        navigate("/auth");
-        return;
-      }
+      if (!session?.user) return;
 
-      const { data, error } = await supabase
-        .from("groups")
+      const { error } = await supabase
+        .from("group_members")
         .insert([
-          {
-            ...newGroup,
-            created_by: session.user.id,
-          },
-        ])
-        .select()
-        .single();
+          { group_id: groupId, user_id: session.user.id }
+        ]);
 
       if (error) throw error;
 
-      // Also add creator as a member
-      await supabase
-        .from("group_members")
-        .insert([
-          {
-            group_id: data.id,
-            user_id: session.user.id,
-            role: "admin",
-          },
-        ]);
-
       toast({
         title: "Success",
-        description: "Group created successfully",
+        description: "You have joined the group successfully!",
       });
 
-      loadGroups();
-      setNewGroup({ name: "", description: "", type: "general" });
-    } catch (error: any) {
+      await loadGroups();
+    } catch (err) {
       toast({
-        title: "Error creating group",
-        description: error.message,
+        title: "Error joining group",
+        description: err instanceof Error ? err.message : "Failed to join group",
         variant: "destructive",
       });
     }
   };
 
-  const handleGroupClick = (groupId: string) => {
-    navigate(`/groups/${groupId}`);
-  };
-
   if (loading) {
-    return <div className="text-center p-4">Loading...</div>;
+    return (
+      <div>
+        <AdventistNav />
+        <div className="text-center p-4">Loading...</div>
+      </div>
+    );
   }
 
   return (
-    <div className="container mx-auto p-4">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Community Groups</h1>
-        <Dialog>
-          <DialogTrigger asChild>
-            <Button>
-              <Plus className="w-4 h-4 mr-2" />
+    <div className="min-h-screen bg-gradient-to-b from-white to-gray-100">
+      <AdventistNav />
+      
+      <div className="max-w-7xl mx-auto px-4 pt-24">
+        <div className="flex justify-between items-center mb-8">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">Groups</h1>
+            <p className="text-muted-foreground">
+              Join and participate in various ministry and interest groups
+            </p>
+          </div>
+          <Button
+            onClick={() => navigate("/groups/create")}
+            className="flex items-center gap-2"
+          >
+            <Plus className="h-4 w-4" />
+            Create Group
+          </Button>
+        </div>
+
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {groups.map((group) => (
+            <Card key={group.id} className="p-6 hover:shadow-lg transition-shadow">
+              <div className="flex items-start justify-between mb-4">
+                <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
+                  <Users className="h-6 w-6 text-primary" />
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handleJoinGroup(group.id)}
+                >
+                  Join
+                </Button>
+              </div>
+              <h3 className="text-xl font-semibold mb-2">{group.name}</h3>
+              <p className="text-muted-foreground mb-4">{group.description}</p>
+              <div className="flex items-center text-sm text-muted-foreground">
+                <Users className="h-4 w-4 mr-2" />
+                {group.member_count} members
+              </div>
+            </Card>
+          ))}
+        </div>
+
+        {groups.length === 0 && (
+          <div className="text-center py-12">
+            <h3 className="text-xl font-semibold mb-2">No Groups Found</h3>
+            <p className="text-muted-foreground mb-4">
+              Be the first to create a group and start building your community!
+            </p>
+            <Button
+              onClick={() => navigate("/groups/create")}
+              className="flex items-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
               Create Group
             </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Create New Group</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium">Name</label>
-                <Input
-                  value={newGroup.name}
-                  onChange={(e) => setNewGroup({ ...newGroup, name: e.target.value })}
-                  placeholder="Enter group name"
-                />
-              </div>
-              <div>
-                <label className="text-sm font-medium">Description</label>
-                <Textarea
-                  value={newGroup.description}
-                  onChange={(e) => setNewGroup({ ...newGroup, description: e.target.value })}
-                  placeholder="Describe your group"
-                />
-              </div>
-              <Button onClick={createGroup} className="w-full">
-                Create Group
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {groups.map((group) => (
-          <Card
-            key={group.id}
-            className="p-4 cursor-pointer hover:shadow-lg transition-shadow"
-            onClick={() => handleGroupClick(group.id)}
-          >
-            <div className="flex items-start space-x-4">
-              <div className="h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center">
-                <Users className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h3 className="font-semibold">{group.name}</h3>
-                <p className="text-sm text-muted-foreground line-clamp-2">{group.description}</p>
-                <div className="mt-2 flex items-center text-sm text-muted-foreground">
-                  <Users className="h-4 w-4 mr-1" />
-                  {group.members_count || 0} members
-                </div>
-              </div>
-            </div>
-          </Card>
-        ))}
+          </div>
+        )}
       </div>
     </div>
   );

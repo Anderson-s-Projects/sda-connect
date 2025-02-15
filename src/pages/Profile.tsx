@@ -1,4 +1,3 @@
-
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -9,6 +8,7 @@ import { BasicInfo } from "@/components/profile/BasicInfo";
 import { MinistryInterests } from "@/components/profile/MinistryInterests";
 import { PrayerRequests } from "@/components/profile/PrayerRequests";
 import { useProfileData } from "@/hooks/useProfileData";
+import AdventistNav from "@/components/AdventistNav";
 
 const MINISTRY_OPTIONS = [
   "Youth Ministry",
@@ -47,11 +47,17 @@ const Profile = () => {
   };
 
   if (loading) {
-    return <div className="text-center p-4">Loading...</div>;
+    return (
+      <div>
+        <AdventistNav />
+        <div className="text-center p-4">Loading...</div>
+      </div>
+    );
   }
 
   return (
     <div className="min-h-screen p-4">
+      <AdventistNav />
       <Card className="max-w-2xl mx-auto p-6 space-y-6">
         <div className="flex justify-between items-center">
           <h1 className="text-2xl font-bold">Profile Settings</h1>

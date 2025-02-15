@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Card } from "@/components/ui/card";
+import AdventistNav from "@/components/AdventistNav";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { Book, Users, Calendar, Plus } from "lucide-react";
@@ -193,30 +193,7 @@ const Main = () => {
 
   return (
     <>
-      {/* Fixed Navigation Bar */}
-      <nav className="bg-white shadow py-4 fixed w-full z-10">
-        <div className="max-w-7xl mx-auto px-4 flex items-center justify-between">
-          <div className="flex items-center space-x-6">
-            <a href="/" className="text-2xl font-bold text-primary">Adventist Connect</a>
-            <a href="/feed" className="hover:text-primary">Feed</a>
-            <a href="/explore" className="hover:text-primary">Explore</a>
-            <a href="/groups" className="hover:text-primary">Groups</a>
-            <a href="/events" className="hover:text-primary">Events</a>
-            <a href="/prayer" className="hover:text-primary">Prayer</a>
-          </div>
-          <div className="flex items-center space-x-4">
-            <button 
-              className="bg-primary text-white px-4 py-2 rounded hover:bg-primary-dark transition"
-              onClick={() => navigate("/create")}
-            >
-              Post
-            </button>
-            {/* Additional quick action buttons could be added here (e.g., Sabbath mode toggle, profile) */}
-          </div>
-        </div>
-      </nav>
-
-      {/* Main Content Container */}
+      <AdventistNav />
       <div className="pt-20 min-h-screen bg-gradient-to-b from-white to-gray-100 p-4">
         <div className="max-w-7xl mx-auto space-y-6">
           <WelcomeSection profile={profile} />
