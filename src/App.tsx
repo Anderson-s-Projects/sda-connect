@@ -9,6 +9,7 @@ import Auth from "./pages/Auth";
 import Profile from "./pages/Profile";
 import Main from "./pages/Main";
 import Groups from "./pages/Groups";
+import Feed from "./pages/Feed";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/profile" element={<Profile />} />
           <Route path="/main" element={<Main />} />
           <Route path="/groups" element={<Groups />} />
+          <Route path="/feed" element={<Feed />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
