@@ -1,15 +1,15 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import AdventistNav from "@/components/AdventistNav";
-import { Card } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Book, Users, Calendar, Plus } from "lucide-react";
+import { Plus } from "lucide-react";
 import { WelcomeSection } from "@/components/dashboard/WelcomeSection";
 import { PrayerRequestsSection } from "@/components/dashboard/PrayerRequestsSection";
 import { CommunityNewsSection } from "@/components/dashboard/CommunityNewsSection";
 import { ResourceLibrarySection } from "@/components/dashboard/ResourceLibrarySection";
+import { QuickLinksSection } from "@/components/dashboard/QuickLinksSection";
+import { MinistryInterestsSection } from "@/components/dashboard/MinistryInterestsSection";
 
 interface UserProfile {
   username: string;
@@ -200,87 +200,12 @@ const Main = () => {
         <div className="max-w-7xl mx-auto space-y-6">
           <WelcomeSection profile={profile} />
 
-          {/* Featured Content Section */}
-          {featuredContent.length > 0 && (
-            <section>
-              <h2 className="text-xl font-bold mb-4">Featured Content</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {featuredContent.map((content) => (
-                  <Card key={content.id} className="p-4 hover:shadow-lg transition">
-                    <h3 className="text-lg font-semibold">{content.title}</h3>
-                    <p className="text-sm text-muted-foreground">{content.type}</p>
-                  </Card>
-                ))}
-              </div>
-            </section>
+          <QuickLinksSection />
+
+          {profile?.ministry_interests && (
+            <MinistryInterestsSection interests={profile.ministry_interests} />
           )}
 
-          {/* Recent Activities Section */}
-          {recentActivities.length > 0 && (
-            <section>
-              <h2 className="text-xl font-bold mb-4">Recent Activities</h2>
-              <ul>
-                {recentActivities.map((activity) => (
-                  <li key={activity.id} className="py-2 border-b">{activity.title}</li>
-                ))}
-              </ul>
-            </section>
-          )}
-
-          {/* Quick Links / Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <Card 
-              className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
-              onClick={() => navigate("/groups")}
-            >
-              <div className="space-y-4">
-                <div className="h-10 w-10 rounded-full bg-green-100 flex items-center justify-center">
-                  <Users className="h-5 w-5 text-green-600" />
-                </div>
-                <h2 className="text-xl font-semibold">Community Groups</h2>
-                <p className="text-muted-foreground">Connect with fellow believers in groups</p>
-              </div>
-            </Card>
-
-            <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer">
-              <div className="space-y-4">
-                <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-                  <Book className="h-5 w-5 text-blue-600" />
-                </div>
-                <h2 className="text-xl font-semibold">Bible Study</h2>
-                <p className="text-muted-foreground">Access daily devotionals and study materials</p>
-              </div>
-            </Card>
-
-            <Card className="p-6 hover:shadow-lg transition-shadow cursor-pointer">
-              <div className="space-y-4">
-                <div className="h-10 w-10 rounded-full bg-purple-100 flex items-center justify-center">
-                  <Calendar className="h-5 w-5 text-purple-600" />
-                </div>
-                <h2 className="text-xl font-semibold">Events</h2>
-                <p className="text-muted-foreground">View upcoming church events</p>
-              </div>
-            </Card>
-          </div>
-
-          {/* Ministry Interests (if available) */}
-          {profile?.ministry_interests && profile.ministry_interests.length > 0 && (
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Your Ministry Interests</h2>
-              <div className="flex flex-wrap gap-2">
-                {profile.ministry_interests.map((ministry) => (
-                  <div
-                    key={ministry}
-                    className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm"
-                  >
-                    {ministry}
-                  </div>
-                ))}
-              </div>
-            </Card>
-          )}
-
-          {/* Additional Sections */}
           <PrayerRequestsSection prayerRequests={prayerRequests} />
           <CommunityNewsSection communityNews={communityNews} />
           <ResourceLibrarySection resources={resources} />

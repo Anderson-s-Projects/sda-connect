@@ -1,8 +1,5 @@
 
-import { useNavigate } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Book } from "lucide-react";
 
 interface PrayerRequest {
   id: string;
@@ -16,39 +13,24 @@ interface PrayerRequestsSectionProps {
 }
 
 export const PrayerRequestsSection = ({ prayerRequests }: PrayerRequestsSectionProps) => {
-  const navigate = useNavigate();
+  if (!prayerRequests.length) return null;
 
   return (
-    <Card className="p-6">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-xl font-semibold">Prayer Requests</h2>
-        <Button 
-          variant="outline" 
-          onClick={() => navigate("/prayer-requests")}
-          className="transition-all duration-300 hover:bg-primary hover:text-primary-foreground"
-        >
-          View All
-        </Button>
-      </div>
-      <div className="space-y-4">
+    <section>
+      <h2 className="text-xl font-bold mb-4">Prayer Requests</h2>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {prayerRequests.map((request) => (
-          <div 
-            key={request.id}
-            className="p-4 bg-muted/50 rounded-lg hover:bg-muted transition-colors cursor-pointer"
-            onClick={() => navigate(`/prayer-requests/${request.id}`)}
-          >
-            <div className="flex items-start space-x-4">
-              <Book className="h-6 w-6 mt-1 text-primary" />
-              <div>
-                <h3 className="font-semibold">{request.title}</h3>
-                <p className="text-sm text-muted-foreground">
-                  {request.description.substring(0, 100)}...
-                </p>
-              </div>
-            </div>
-          </div>
+          <Card key={request.id} className="p-4">
+            <h3 className="font-semibold">{request.title}</h3>
+            <p className="text-sm text-muted-foreground mt-2">
+              {request.description}
+            </p>
+            <p className="text-xs text-muted-foreground mt-2">
+              {new Date(request.created_at).toLocaleDateString()}
+            </p>
+          </Card>
         ))}
       </div>
-    </Card>
+    </section>
   );
 };
