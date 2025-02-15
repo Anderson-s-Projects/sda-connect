@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
@@ -9,7 +8,6 @@ const initialProfileData: ProfileData = {
   username: "",
   church_affiliation: "",
   ministry_interests: [],
-  bio: "",
   about: "",
   avatar_url: "",
   prayer_requests: [],
@@ -56,7 +54,6 @@ export const useProfileData = () => {
         setProfileData({
           ...initialProfileData,
           ...data,
-          bio: data.about || "",
           prayer_requests: Array.isArray(data.prayer_requests) ? data.prayer_requests : [],
           ministry_interests: Array.isArray(data.ministry_interests) ? data.ministry_interests : []
         });

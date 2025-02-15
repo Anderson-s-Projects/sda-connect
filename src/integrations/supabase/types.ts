@@ -301,6 +301,36 @@ export type Database = {
         }
         Relationships: []
       }
+      posts: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          is_sabbath_appropriate: boolean | null
+          type: string
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          is_sabbath_appropriate?: boolean | null
+          type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          is_sabbath_appropriate?: boolean | null
+          type?: string
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: []
+      }
       prayer_requests: {
         Row: {
           created_at: string
@@ -490,6 +520,36 @@ export type Database = {
           created_at?: string
           follower_id?: string
           following_id?: string
+        }
+        Relationships: []
+      }
+      user_preferences: {
+        Row: {
+          created_at: string
+          latitude: number | null
+          longitude: number | null
+          sabbath_mode_enabled: boolean | null
+          timezone: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          latitude?: number | null
+          longitude?: number | null
+          sabbath_mode_enabled?: boolean | null
+          timezone?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          latitude?: number | null
+          longitude?: number | null
+          sabbath_mode_enabled?: boolean | null
+          timezone?: string | null
+          updated_at?: string
+          user_id?: string
         }
         Relationships: []
       }

@@ -5,19 +5,19 @@ import { Textarea } from "@/components/ui/textarea";
 interface BasicInfoProps {
   username: string;
   churchAffiliation: string;
-  bio: string;
+  about: string;
   onUsernameChange: (value: string) => void;
   onChurchChange: (value: string) => void;
-  onBioChange: (value: string) => void;
+  onAboutChange: (value: string) => void;
 }
 
 export const BasicInfo = ({
   username,
   churchAffiliation,
-  bio,
+  about,
   onUsernameChange,
   onChurchChange,
-  onBioChange,
+  onAboutChange,
 }: BasicInfoProps) => {
   return (
     <div className="space-y-4">
@@ -46,10 +46,10 @@ export const BasicInfo = ({
       </div>
 
       <div className="space-y-2">
-        <label className="text-sm font-medium">Personal Bio</label>
+        <label className="text-sm font-medium">About Me</label>
         <Textarea
-          value={bio}
-          onChange={(e) => onBioChange(e.target.value)}
+          value={about}
+          onChange={(e) => onAboutChange(e.target.value)}
           placeholder="Tell us about yourself..."
           className="min-h-[100px]"
         />

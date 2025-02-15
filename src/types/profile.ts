@@ -3,7 +3,6 @@ export interface ProfileData {
   username: string;
   church_affiliation: string;
   ministry_interests: string[];
-  bio: string;
   about: string;
   avatar_url: string;
   prayer_requests: string[];

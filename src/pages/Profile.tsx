@@ -70,10 +70,10 @@ const Profile = () => {
           <BasicInfo
             username={profileData.username}
             churchAffiliation={profileData.church_affiliation}
-            bio={profileData.bio || profileData.about}
+            about={profileData.about}
             onUsernameChange={(value) => setProfileData(prev => ({ ...prev, username: value }))}
             onChurchChange={(value) => setProfileData(prev => ({ ...prev, church_affiliation: value }))}
-            onBioChange={(value) => setProfileData(prev => ({ ...prev, bio: value, about: value }))}
+            onAboutChange={(value) => setProfileData(prev => ({ ...prev, about: value }))}
           />
 
           <MinistryInterests
