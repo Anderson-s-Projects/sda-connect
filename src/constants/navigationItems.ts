@@ -1,7 +1,6 @@
 
 import {
-  Home, Compass, Users, Calendar, Heart,
-  Bell, User
+  Home, Compass, Heart, Bell, User
 } from 'lucide-react';
 import { NavItemProps } from '@/types/navigation';
 
@@ -19,20 +18,6 @@ export const navItems: NavItemProps[] = [
     to: '/main', 
     primary: true,
     description: 'Discover new content, trending topics, and spiritual resources'
-  },
-  { 
-    icon: Users, 
-    label: 'Groups', 
-    to: '/groups', 
-    primary: true,
-    description: 'Join interest-based congregations, local church groups, and study forums'
-  },
-  { 
-    icon: Calendar, 
-    label: 'Events', 
-    to: '/events', 
-    primary: true,
-    description: 'Access your calendar for church services, gatherings, and spiritual events'
   },
   { 
     icon: Heart, 
