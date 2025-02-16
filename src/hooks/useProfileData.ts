@@ -4,35 +4,13 @@ import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { ProfileData } from "@/types/profile";
-
-const initialProfileData: ProfileData = {
-  username: "",
-  church_affiliation: "",
-  ministry_interests: [],
-  about: "",
-  avatar_url: "",
-  prayer_requests: [],
-  full_name: "",
-  id: "",
-  location: "",
-  privacy_settings: {},
-  created_at: "",
-  updated_at: "",
-  favorite_bible_verse: "",
-  cover_photo_url: null,
-  bio: null,
-  professional_accomplishments: [],
-  skills: [],
-  interests: [],
-  profile_completion_percentage: 0,
-  element_privacy: {
-    email: "private",
-    bio: "public",
-    skills: "public",
-    interests: "public",
-    accomplishments: "public"
-  }
-};
+import { initialProfileData } from "@/constants/profileConstants";
+import { 
+  transformProfessionalAccomplishments, 
+  transformElementPrivacy,
+  transformArrayField 
+} from "@/utils/profileDataTransformers";
+import { uploadProfileImage } from "@/utils/profileImageHandlers";
 
 export const useProfileData = () => {
   const [loading, setLoading] = useState(true);
@@ -65,42 +43,17 @@ export const useProfileData = () => {
       if (error) throw error;
 
       if (data) {
-        const accomplishments = Array.isArray(data.professional_accomplishments) 
-          ? data.professional_accomplishments.map(acc => {
-              if (typeof acc === 'object' && acc !== null) {
-                const accomp = acc as Record<string, unknown>;
-                return {
-                  title: String(accomp.title || ''),
-                  description: String(accomp.description || ''),
-                  date: String(accomp.date || '')
-                };
-              }
-              return {
-                title: '',
-                description: '',
-                date: ''
-              };
-            })
-          : [];
-
-        const elementPrivacy = typeof data.element_privacy === 'object' && data.element_privacy !== null
-          ? {
-              email: (data.element_privacy as Record<string, string>).email as 'private' | 'public' || 'private',
-              bio: (data.element_privacy as Record<string, string>).bio as 'private' | 'public' || 'public',
-              skills: (data.element_privacy as Record<string, string>).skills as 'private' | 'public' || 'public',
-              interests: (data.element_privacy as Record<string, string>).interests as 'private' | 'public' || 'public',
-              accomplishments: (data.element_privacy as Record<string, string>).accomplishments as 'private' | 'public' || 'public'
-            }
-          : initialProfileData.element_privacy;
+        const accomplishments = transformProfessionalAccomplishments(data.professional_accomplishments);
+        const elementPrivacy = transformElementPrivacy(data.element_privacy, initialProfileData.element_privacy);
 
         setProfileData({
           ...initialProfileData,
           ...data,
           professional_accomplishments: accomplishments,
-          prayer_requests: Array.isArray(data.prayer_requests) ? data.prayer_requests : [],
-          ministry_interests: Array.isArray(data.ministry_interests) ? data.ministry_interests : [],
-          skills: Array.isArray(data.skills) ? data.skills : [],
-          interests: Array.isArray(data.interests) ? data.interests : [],
+          prayer_requests: transformArrayField(data.prayer_requests),
+          ministry_interests: transformArrayField(data.ministry_interests),
+          skills: transformArrayField(data.skills),
+          interests: transformArrayField(data.interests),
           element_privacy: elementPrivacy
         });
       }
@@ -119,44 +72,24 @@ export const useProfileData = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      toast({
-        title: "Error",
-        description: "Please select a valid image file",
-        variant: "destructive",
-      });
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      navigate("/auth");
       return;
     }
 
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) {
-        navigate("/auth");
-        return;
-      }
+    const publicUrl = await uploadProfileImage({
+      file,
+      userId: session.user.id,
+      storageBucket: 'avatars',
+      toast
+    });
 
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${session.user.id}-${Math.random()}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage
-        .from('avatars')
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('avatars')
-        .getPublicUrl(fileName);
-
+    if (publicUrl) {
       setProfileData(prev => ({
         ...prev,
         avatar_url: publicUrl
       }));
-    } catch (error: any) {
-      toast({
-        title: "Error uploading image",
-        description: error.message,
-        variant: "destructive",
-      });
     }
   };
 
@@ -164,44 +97,24 @@ export const useProfileData = () => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    if (!file.type.startsWith('image/')) {
-      toast({
-        title: "Error",
-        description: "Please select a valid image file",
-        variant: "destructive",
-      });
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session?.user) {
+      navigate("/auth");
       return;
     }
 
-    try {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session?.user) {
-        navigate("/auth");
-        return;
-      }
+    const publicUrl = await uploadProfileImage({
+      file,
+      userId: session.user.id,
+      storageBucket: 'covers',
+      toast
+    });
 
-      const fileExt = file.name.split('.').pop();
-      const fileName = `${session.user.id}-${Math.random()}.${fileExt}`;
-      const { error: uploadError } = await supabase.storage
-        .from('covers')
-        .upload(fileName, file);
-
-      if (uploadError) throw uploadError;
-
-      const { data: { publicUrl } } = supabase.storage
-        .from('covers')
-        .getPublicUrl(fileName);
-
+    if (publicUrl) {
       setProfileData(prev => ({
         ...prev,
         cover_photo_url: publicUrl
       }));
-    } catch (error: any) {
-      toast({
-        title: "Error uploading cover photo",
-        description: error.message,
-        variant: "destructive",
-      });
     }
   };
 
