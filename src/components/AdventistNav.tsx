@@ -80,13 +80,12 @@ const NavItem = ({ icon: Icon, label, primary, to, description }: NavItemProps) 
   const content = (
     <Link
       to={to}
-      className={`flex flex-col items-center justify-center px-4 py-2 rounded-lg transition-all duration-300
+      className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-all duration-300
         ${isSabbathMode ? 'hover:bg-slate-200' : 'hover:bg-blue-50'}
-        ${isMobile ? 'text-xs' : 'text-sm'}
-        ${primary || !isMobile ? '' : 'hidden md:flex'}
+        ${isMobile ? 'text-base w-full' : 'text-sm'}
       `}
     >
-      <Icon className={`h-6 w-6 mb-1 ${isSabbathMode ? 'text-slate-700' : 'text-blue-600'}`} />
+      <Icon className={`h-5 w-5 ${isSabbathMode ? 'text-slate-700' : 'text-blue-600'}`} />
       <span className={isSabbathMode ? 'text-slate-700' : 'text-blue-600'}>{label}</span>
     </Link>
   );
@@ -133,25 +132,6 @@ const AdventistNav = () => {
               ))}
             </div>
 
-            {/* Sabbath Mode Toggle */}
-            <TooltipProvider>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button
-                    onClick={() => setSabbathMode(!isSabbathMode)}
-                    className={`p-2 rounded-lg transition-all duration-300
-                      ${isSabbathMode ? 'bg-slate-200 text-slate-700' : 'bg-blue-50 text-blue-600'}
-                    `}
-                  >
-                    {isSabbathMode ? <Moon className="h-6 w-6" /> : <Sun className="h-6 w-6" />}
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Toggle Sabbath Mode</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-
             {/* Mobile Menu Button */}
             <button
               className="md:hidden p-2"
@@ -163,14 +143,44 @@ const AdventistNav = () => {
                 <Menu className={isSabbathMode ? 'text-slate-700' : 'text-blue-600'} />
               )}
             </button>
+
+            {/* Sabbath Mode Toggle */}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <button
+                    onClick={() => setSabbathMode(!isSabbathMode)}
+                    className={`hidden md:block p-2 rounded-lg transition-all duration-300
+                      ${isSabbathMode ? 'bg-slate-200 text-slate-700' : 'bg-blue-50 text-blue-600'}
+                    `}
+                  >
+                    {isSabbathMode ? <Moon className="h-6 w-6" /> : <Sun className="h-6 w-6" />}
+                  </button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Toggle Sabbath Mode</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
 
-          {/* Mobile Navigation */}
-          {isMobile && (
-            <div className="fixed bottom-0 left-0 right-0 bg-white border-t flex justify-around items-center p-2">
-              {navItems.filter(item => item.primary).map((item, index) => (
-                <NavItem key={index} {...item} />
-              ))}
+          {/* Mobile Menu */}
+          {isMobile && isMobileMenuOpen && (
+            <div className="fixed inset-0 top-14 bg-white z-50 pt-4">
+              <div className="flex flex-col space-y-2 p-4">
+                {navItems.map((item, index) => (
+                  <NavItem key={index} {...item} />
+                ))}
+                <button
+                  onClick={() => setSabbathMode(!isSabbathMode)}
+                  className={`flex items-center gap-2 w-full px-4 py-2 rounded-lg transition-all duration-300
+                    ${isSabbathMode ? 'bg-slate-200 text-slate-700' : 'bg-blue-50 text-blue-600'}
+                  `}
+                >
+                  {isSabbathMode ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+                  <span>Toggle Sabbath Mode</span>
+                </button>
+              </div>
             </div>
           )}
 
