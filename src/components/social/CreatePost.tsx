@@ -89,11 +89,20 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
             .from('post-attachments')
             .getPublicUrl(fileName);
 
-          await supabase.from('post_attachments').insert({
-            post_id: post.id,
-            file_type: file.type,
-            url: publicUrl,
-          });
+          const { error: attachmentError } = await supabase
+            .from('posts')
+            .update({
+              metadata: {
+                attachments: [{
+                  type: file.type,
+                  url: publicUrl,
+                  name: file.name
+                }]
+              }
+            })
+            .eq('id', post.id);
+
+          if (attachmentError) throw attachmentError;
         }
       }
 

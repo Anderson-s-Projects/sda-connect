@@ -5,7 +5,6 @@ import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { CreatePost } from "./CreatePost";
-import { Post } from "@/types/post";
 import { Button } from "@/components/ui/button";
 import { Image, Video, FileText, Heart, MessageSquare, Share } from "lucide-react";
 
@@ -24,8 +23,7 @@ export const SocialFeed = () => {
       .from("posts")
       .select(`
         *,
-        profiles:user_id (username, avatar_url),
-        post_attachments (*)
+        profiles (username, avatar_url)
       `)
       .eq("draft", false)
       .range(from, to);
@@ -49,6 +47,7 @@ export const SocialFeed = () => {
   } = useInfiniteQuery({
     queryKey: ["posts", sortOrder],
     queryFn: fetchPosts,
+    initialPageParam: 0,
     getNextPageParam: (lastPage, pages) => {
       if (lastPage.length < POSTS_PER_PAGE) return undefined;
       return pages.length;
@@ -76,42 +75,46 @@ export const SocialFeed = () => {
     };
   }, [handleObserver]);
 
-  const renderAttachment = (attachment: any) => {
-    if (attachment.file_type.startsWith("image/")) {
-      return (
-        <div className="mt-4">
-          <img
-            src={attachment.url}
-            alt="Post attachment"
-            className="rounded-lg max-h-96 w-full object-cover"
-          />
-        </div>
-      );
-    }
+  const renderAttachment = (post: any) => {
+    const attachments = post.metadata?.attachments || [];
+    return attachments.map((attachment: any, index: number) => {
+      if (attachment.type.startsWith("image/")) {
+        return (
+          <div key={index} className="mt-4">
+            <img
+              src={attachment.url}
+              alt="Post attachment"
+              className="rounded-lg max-h-96 w-full object-cover"
+            />
+          </div>
+        );
+      }
 
-    if (attachment.file_type.startsWith("video/")) {
-      return (
-        <div className="mt-4">
-          <video
-            src={attachment.url}
-            controls
-            className="rounded-lg w-full"
-          />
-        </div>
-      );
-    }
+      if (attachment.type.startsWith("video/")) {
+        return (
+          <div key={index} className="mt-4">
+            <video
+              src={attachment.url}
+              controls
+              className="rounded-lg w-full"
+            />
+          </div>
+        );
+      }
 
-    return (
-      <a
-        href={attachment.url}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-4 flex items-center gap-2 p-4 bg-muted rounded-lg hover:bg-muted/80"
-      >
-        <FileText className="h-6 w-6" />
-        <span>View attachment</span>
-      </a>
-    );
+      return (
+        <a
+          key={index}
+          href={attachment.url}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="mt-4 flex items-center gap-2 p-4 bg-muted rounded-lg hover:bg-muted/80"
+        >
+          <FileText className="h-6 w-6" />
+          <span>View attachment</span>
+        </a>
+      );
+    });
   };
 
   return (
@@ -161,11 +164,7 @@ export const SocialFeed = () => {
                   
                   <p className="mt-2">{post.content}</p>
 
-                  {post.post_attachments?.map((attachment: any) => (
-                    <div key={attachment.id}>
-                      {renderAttachment(attachment)}
-                    </div>
-                  ))}
+                  {renderAttachment(post)}
 
                   <div className="flex gap-4 mt-4">
                     <Button variant="ghost" size="sm" className="gap-2">
