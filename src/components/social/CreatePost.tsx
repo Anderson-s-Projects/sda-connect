@@ -21,6 +21,7 @@ import { format } from "date-fns";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { Calendar as CalendarIcon, Image, Video, FileText, PlusCircle } from "lucide-react";
+import type { Post } from "@/types/database";
 
 interface CreatePostProps {
   onPostCreated: () => void;
@@ -65,9 +66,9 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
           title: title || null,
           type: postType,
           user_id: user.id,
-          scheduled_for: scheduledDate?.toISOString(),
-          audience: { type: audience },
-          metadata: null // Initialize with null
+          draft: false,
+          is_sabbath_appropriate: true,
+          metadata: null
         })
         .select()
         .single();

@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
@@ -65,11 +66,20 @@ export const useProfileData = () => {
 
       if (data) {
         const accomplishments = Array.isArray(data.professional_accomplishments) 
-          ? data.professional_accomplishments.map(acc => ({
-              title: String(acc.title || ''),
-              description: String(acc.description || ''),
-              date: String(acc.date || '')
-            }))
+          ? data.professional_accomplishments.map(acc => {
+              if (typeof acc === 'object' && acc !== null) {
+                return {
+                  title: String(acc.title || ''),
+                  description: String(acc.description || ''),
+                  date: String(acc.date || '')
+                };
+              }
+              return {
+                title: '',
+                description: '',
+                date: ''
+              };
+            })
           : [];
 
         setProfileData({
@@ -79,7 +89,14 @@ export const useProfileData = () => {
           prayer_requests: Array.isArray(data.prayer_requests) ? data.prayer_requests : [],
           ministry_interests: Array.isArray(data.ministry_interests) ? data.ministry_interests : [],
           skills: Array.isArray(data.skills) ? data.skills : [],
-          interests: Array.isArray(data.interests) ? data.interests : []
+          interests: Array.isArray(data.interests) ? data.interests : [],
+          element_privacy: {
+            email: data.element_privacy?.email || "private",
+            bio: data.element_privacy?.bio || "public",
+            skills: data.element_privacy?.skills || "public",
+            interests: data.element_privacy?.interests || "public",
+            accomplishments: data.element_privacy?.accomplishments || "public"
+          }
         });
       }
     } catch (error: any) {

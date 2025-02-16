@@ -305,8 +305,11 @@ export type Database = {
         Row: {
           content: string
           created_at: string
+          draft: boolean | null
           id: string
           is_sabbath_appropriate: boolean | null
+          metadata: Json | null
+          title: string | null
           type: string
           updated_at: string
           user_id: string | null
@@ -314,8 +317,11 @@ export type Database = {
         Insert: {
           content: string
           created_at?: string
+          draft?: boolean | null
           id?: string
           is_sabbath_appropriate?: boolean | null
+          metadata?: Json | null
+          title?: string | null
           type?: string
           updated_at?: string
           user_id?: string | null
@@ -323,8 +329,11 @@ export type Database = {
         Update: {
           content?: string
           created_at?: string
+          draft?: boolean | null
           id?: string
           is_sabbath_appropriate?: boolean | null
+          metadata?: Json | null
+          title?: string | null
           type?: string
           updated_at?: string
           user_id?: string | null

@@ -1,3 +1,4 @@
+
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
@@ -34,7 +35,7 @@ export const SocialFeed = () => {
       .order(sortOrder === "latest" ? "created_at" : "likes_count", { ascending: false });
 
     if (error) throw error;
-    return data as PostWithProfile[];
+    return data as unknown as PostWithProfile[];
   };
 
   const {
