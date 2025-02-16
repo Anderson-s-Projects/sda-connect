@@ -68,10 +68,11 @@ export const useProfileData = () => {
         const accomplishments = Array.isArray(data.professional_accomplishments) 
           ? data.professional_accomplishments.map(acc => {
               if (typeof acc === 'object' && acc !== null) {
+                const accomp = acc as Record<string, unknown>;
                 return {
-                  title: String(acc.title || ''),
-                  description: String(acc.description || ''),
-                  date: String(acc.date || '')
+                  title: String(accomp.title || ''),
+                  description: String(accomp.description || ''),
+                  date: String(accomp.date || '')
                 };
               }
               return {
@@ -82,6 +83,16 @@ export const useProfileData = () => {
             })
           : [];
 
+        const elementPrivacy = typeof data.element_privacy === 'object' && data.element_privacy !== null
+          ? {
+              email: (data.element_privacy as Record<string, string>).email as 'private' | 'public' || 'private',
+              bio: (data.element_privacy as Record<string, string>).bio as 'private' | 'public' || 'public',
+              skills: (data.element_privacy as Record<string, string>).skills as 'private' | 'public' || 'public',
+              interests: (data.element_privacy as Record<string, string>).interests as 'private' | 'public' || 'public',
+              accomplishments: (data.element_privacy as Record<string, string>).accomplishments as 'private' | 'public' || 'public'
+            }
+          : initialProfileData.element_privacy;
+
         setProfileData({
           ...initialProfileData,
           ...data,
@@ -90,13 +101,7 @@ export const useProfileData = () => {
           ministry_interests: Array.isArray(data.ministry_interests) ? data.ministry_interests : [],
           skills: Array.isArray(data.skills) ? data.skills : [],
           interests: Array.isArray(data.interests) ? data.interests : [],
-          element_privacy: {
-            email: data.element_privacy?.email || "private",
-            bio: data.element_privacy?.bio || "public",
-            skills: data.element_privacy?.skills || "public",
-            interests: data.element_privacy?.interests || "public",
-            accomplishments: data.element_privacy?.accomplishments || "public"
-          }
+          element_privacy: elementPrivacy
         });
       }
     } catch (error: any) {
