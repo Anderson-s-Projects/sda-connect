@@ -43,7 +43,12 @@ export const useProfileData = () => {
       if (error) throw error;
 
       if (data) {
-        const accomplishments = transformProfessionalAccomplishments(data.professional_accomplishments);
+        const accomplishments = transformProfessionalAccomplishments(
+          Array.isArray(data.professional_accomplishments) 
+            ? data.professional_accomplishments 
+            : []
+        );
+        
         const elementPrivacy = transformElementPrivacy(data.element_privacy, initialProfileData.element_privacy);
 
         setProfileData({
