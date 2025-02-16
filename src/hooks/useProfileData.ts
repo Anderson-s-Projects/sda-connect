@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "@/components/ui/use-toast";
@@ -65,16 +64,22 @@ export const useProfileData = () => {
       if (error) throw error;
 
       if (data) {
+        const accomplishments = Array.isArray(data.professional_accomplishments) 
+          ? data.professional_accomplishments.map(acc => ({
+              title: String(acc.title || ''),
+              description: String(acc.description || ''),
+              date: String(acc.date || '')
+            }))
+          : [];
+
         setProfileData({
           ...initialProfileData,
           ...data,
+          professional_accomplishments: accomplishments,
           prayer_requests: Array.isArray(data.prayer_requests) ? data.prayer_requests : [],
           ministry_interests: Array.isArray(data.ministry_interests) ? data.ministry_interests : [],
           skills: Array.isArray(data.skills) ? data.skills : [],
-          interests: Array.isArray(data.interests) ? data.interests : [],
-          professional_accomplishments: Array.isArray(data.professional_accomplishments) 
-            ? data.professional_accomplishments 
-            : []
+          interests: Array.isArray(data.interests) ? data.interests : []
         });
       }
     } catch (error: any) {

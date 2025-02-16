@@ -1,4 +1,3 @@
-
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
@@ -7,8 +6,13 @@ import { supabase } from "@/integrations/supabase/client";
 import { CreatePost } from "./CreatePost";
 import { Button } from "@/components/ui/button";
 import { Image, Video, FileText, Heart, MessageSquare, Share } from "lucide-react";
+import type { Post, Profile } from "@/types/database";
 
 const POSTS_PER_PAGE = 10;
+
+interface PostWithProfile extends Post {
+  profiles: Profile | null;
+}
 
 export const SocialFeed = () => {
   const { toast } = useToast();
@@ -19,23 +23,18 @@ export const SocialFeed = () => {
     const from = pageParam * POSTS_PER_PAGE;
     const to = from + POSTS_PER_PAGE - 1;
 
-    const query = supabase
+    const { data, error } = await supabase
       .from("posts")
       .select(`
         *,
         profiles (username, avatar_url)
       `)
       .eq("draft", false)
-      .range(from, to);
-
-    if (sortOrder === "latest") {
-      query.order("created_at", { ascending: false });
-    }
-
-    const { data, error } = await query;
+      .range(from, to)
+      .order(sortOrder === "latest" ? "created_at" : "likes_count", { ascending: false });
 
     if (error) throw error;
-    return data;
+    return data as PostWithProfile[];
   };
 
   const {
@@ -75,9 +74,9 @@ export const SocialFeed = () => {
     };
   }, [handleObserver]);
 
-  const renderAttachment = (post: any) => {
+  const renderAttachment = (post: PostWithProfile) => {
     const attachments = post.metadata?.attachments || [];
-    return attachments.map((attachment: any, index: number) => {
+    return attachments.map((attachment, index) => {
       if (attachment.type.startsWith("image/")) {
         return (
           <div key={index} className="mt-4">
@@ -138,7 +137,7 @@ export const SocialFeed = () => {
 
       {data?.pages.map((page, pageIndex) => (
         <div key={pageIndex} className="space-y-4">
-          {page.map((post: any) => (
+          {page.map((post: PostWithProfile) => (
             <Card key={post.id} className="p-6">
               <div className="flex items-start gap-4">
                 <img

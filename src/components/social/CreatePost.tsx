@@ -67,6 +67,7 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
           user_id: user.id,
           scheduled_for: scheduledDate?.toISOString(),
           audience: { type: audience },
+          metadata: null // Initialize with null
         })
         .select()
         .single();
@@ -75,6 +76,8 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
 
       // Handle attachments
       if (attachments.length > 0) {
+        const uploadedAttachments = [];
+
         for (const file of attachments) {
           const fileExt = file.name.split('.').pop();
           const fileName = `${post.id}/${crypto.randomUUID()}.${fileExt}`;
@@ -89,21 +92,23 @@ export const CreatePost = ({ onPostCreated }: CreatePostProps) => {
             .from('post-attachments')
             .getPublicUrl(fileName);
 
-          const { error: attachmentError } = await supabase
-            .from('posts')
-            .update({
-              metadata: {
-                attachments: [{
-                  type: file.type,
-                  url: publicUrl,
-                  name: file.name
-                }]
-              }
-            })
-            .eq('id', post.id);
-
-          if (attachmentError) throw attachmentError;
+          uploadedAttachments.push({
+            type: file.type,
+            url: publicUrl,
+            name: file.name
+          });
         }
+
+        const { error: updateError } = await supabase
+          .from("posts")
+          .update({
+            metadata: {
+              attachments: uploadedAttachments
+            }
+          })
+          .eq('id', post.id);
+
+        if (updateError) throw updateError;
       }
 
       toast({
