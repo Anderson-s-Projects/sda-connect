@@ -46,7 +46,7 @@ const Feed = () => {
           </div>
 
           {/* Sidebar */}
-          <div className={`w-80 space-y-6 ${sidebarOpen ? 'block' : 'hidden'}`}>
+          <div className="py-[2px] my-0 mx-0 px-[3px] rounded-none">
             {/* Search */}
             <Card className="p-4 px-0 py-0">
               <div className="relative">
@@ -56,19 +56,19 @@ const Feed = () => {
             </Card>
 
             {/* Quick Filters */}
-            <Card className="p-2 px-0 py-0">
-              <h3 className="font-semibold mb-3 flex items-center gap-2">
+            <Card className="p-2 px-0 py-[8px]">
+              <h3 className="font-semibold mb-3 flex items-center gap-2 px-0 py-0">
                 <Filter className="h-4 w-4" />
                 Quick Filters
               </h3>
               <div className="space-y-2">
-                <Button variant="outline" size="sm" className="w-full justify-start">
+                <Button variant="outline" size="sm" className="w-full justify-start px-[4px] py-[4px] mx-[4px] my-[4px]">
                   Text Posts
                 </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start">
+                <Button variant="outline" size="sm" className="w-full justify-start px-[4px] mx-[4px] my-[4px] py-[4px]">
                   Images
                 </Button>
-                <Button variant="outline" size="sm" className="w-full justify-start">
+                <Button variant="outline" size="sm" className="w-full justify-start px-[4px] mx-[4px] my-[4px] py-[4px]">
                   Videos
                 </Button>
               </div>
