@@ -18,6 +18,7 @@ export interface Post {
   is_sabbath_appropriate: boolean | null;
   metadata: PostMetadata | null;
   draft: boolean;
+  likes_count?: number;
 }
 
 export interface Profile {
@@ -29,4 +30,8 @@ export interface Profile {
     description: string;
     date: string;
   }[];
+}
+
+export interface PostWithProfile extends Post {
+  profiles: Profile | null;
 }
