@@ -1,6 +1,6 @@
 
 import {
-  Home, rss, Heart, Bell, User
+  Home, Rss, Heart, Bell, User
 } from 'lucide-react';
 import { NavItemProps } from '@/types/navigation';
 
@@ -13,7 +13,7 @@ export const navItems: NavItemProps[] = [
     description: 'Your main feed with latest posts, updates, and personalized content from your community'
   },
   { 
-    icon: rss, 
+    icon: Rss, 
     label: 'Feed', 
     to: '/feed', 
     primary: true,
