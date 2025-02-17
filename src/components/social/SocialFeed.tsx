@@ -66,7 +66,7 @@ export const SocialFeed = () => {
       <CreatePost onPostCreated={() => refetch()} />
 
       <div className="flex justify-end gap-2 mb-4">
-        <Button variant={sortOrder === "latest" ? "default" : "outline"} onClick={() => setSortOrder("latest")}>
+        <Button variant={sortOrder === "latest" ? "default" : "outline"} onClick={() => setSortOrder("latest")} className="">
           Latest
         </Button>
         <Button variant={sortOrder === "popular" ? "default" : "outline"} onClick={() => setSortOrder("popular")}>

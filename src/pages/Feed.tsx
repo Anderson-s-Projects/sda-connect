@@ -56,12 +56,12 @@ const Feed = () => {
             </Card>
 
             {/* Quick Filters */}
-            <Card className="p-4 px-0 py-[8px]">
+            <Card className="p-4 px-0 py-[9px]">
               <h3 className="font-semibold mb-3 flex items-center gap-2 px-0 py-0">
                 <Filter className="h-4 w-4" />
                 Quick Filters
               </h3>
-              <div className="space-y-2">
+              <div className="space-y-2 py-0">
                 <Button variant="outline" size="sm" className="w-full justify-start px-[4px] py-[4px] mx-[4px] my-[4px]">
                   Text Posts
                 </Button>
