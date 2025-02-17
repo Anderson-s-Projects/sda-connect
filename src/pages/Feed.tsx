@@ -56,7 +56,7 @@ const Feed = () => {
             </Card>
 
             {/* Quick Filters */}
-            <Card className="p-4">
+            <Card className="p-2">
               <h3 className="font-semibold mb-3 flex items-center gap-2">
                 <Filter className="h-4 w-4" />
                 Quick Filters
