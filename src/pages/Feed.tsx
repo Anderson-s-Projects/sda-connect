@@ -48,7 +48,7 @@ const Feed = () => {
           {/* Sidebar */}
           <div className={`w-80 space-y-6 ${sidebarOpen ? 'block' : 'hidden'}`}>
             {/* Search */}
-            <Card className="p-4">
+            <Card className="p-4 px-0 py-0">
               <div className="relative">
                 <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
                 <Input placeholder="Search posts..." className="pl-8" value={searchTerm} onChange={e => setSearchTerm(e.target.value)} />
@@ -56,7 +56,7 @@ const Feed = () => {
             </Card>
 
             {/* Quick Filters */}
-            <Card className="p-2">
+            <Card className="p-2 px-0 py-0">
               <h3 className="font-semibold mb-3 flex items-center gap-2">
                 <Filter className="h-4 w-4" />
                 Quick Filters
