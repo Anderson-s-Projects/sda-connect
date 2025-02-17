@@ -1,19 +1,14 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useInfiniteQuery } from "@tanstack/react-query";
-import { Card } from "@/components/ui/card";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { CreatePost } from "./CreatePost";
 import { Button } from "@/components/ui/button";
-import { Image, Video, FileText, Heart, MessageSquare, Share } from "lucide-react";
-import type { Post, Profile } from "@/types/database";
+import { PostCard } from "./PostCard";
+import type { PostWithProfile } from "@/types/database";
 
 const POSTS_PER_PAGE = 10;
-
-interface PostWithProfile extends Post {
-  profiles: Profile | null;
-}
 
 export const SocialFeed = () => {
   const { toast } = useToast();
@@ -75,48 +70,6 @@ export const SocialFeed = () => {
     };
   }, [handleObserver]);
 
-  const renderAttachment = (post: PostWithProfile) => {
-    const attachments = post.metadata?.attachments || [];
-    return attachments.map((attachment, index) => {
-      if (attachment.type.startsWith("image/")) {
-        return (
-          <div key={index} className="mt-4">
-            <img
-              src={attachment.url}
-              alt="Post attachment"
-              className="rounded-lg max-h-96 w-full object-cover"
-            />
-          </div>
-        );
-      }
-
-      if (attachment.type.startsWith("video/")) {
-        return (
-          <div key={index} className="mt-4">
-            <video
-              src={attachment.url}
-              controls
-              className="rounded-lg w-full"
-            />
-          </div>
-        );
-      }
-
-      return (
-        <a
-          key={index}
-          href={attachment.url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="mt-4 flex items-center gap-2 p-4 bg-muted rounded-lg hover:bg-muted/80"
-        >
-          <FileText className="h-6 w-6" />
-          <span>View attachment</span>
-        </a>
-      );
-    });
-  };
-
   return (
     <div className="max-w-2xl mx-auto space-y-6 py-6">
       <CreatePost onPostCreated={() => refetch()} />
@@ -139,50 +92,7 @@ export const SocialFeed = () => {
       {data?.pages.map((page, pageIndex) => (
         <div key={pageIndex} className="space-y-4">
           {page.map((post: PostWithProfile) => (
-            <Card key={post.id} className="p-6">
-              <div className="flex items-start gap-4">
-                <img
-                  src={post.profiles?.avatar_url || "/placeholder.svg"}
-                  alt={post.profiles?.username}
-                  className="w-10 h-10 rounded-full"
-                />
-                <div className="flex-1">
-                  <div className="flex justify-between items-start">
-                    <div>
-                      <h3 className="font-semibold">
-                        {post.profiles?.username || "Anonymous"}
-                      </h3>
-                      <p className="text-sm text-muted-foreground">
-                        {new Date(post.created_at).toLocaleDateString()}
-                      </p>
-                    </div>
-                  </div>
-                  
-                  {post.title && (
-                    <h4 className="text-lg font-semibold mt-2">{post.title}</h4>
-                  )}
-                  
-                  <p className="mt-2">{post.content}</p>
-
-                  {renderAttachment(post)}
-
-                  <div className="flex gap-4 mt-4">
-                    <Button variant="ghost" size="sm" className="gap-2">
-                      <Heart className="h-4 w-4" />
-                      Like
-                    </Button>
-                    <Button variant="ghost" size="sm" className="gap-2">
-                      <MessageSquare className="h-4 w-4" />
-                      Comment
-                    </Button>
-                    <Button variant="ghost" size="sm" className="gap-2">
-                      <Share className="h-4 w-4" />
-                      Share
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </Card>
+            <PostCard key={post.id} post={post} />
           ))}
         </div>
       ))}
